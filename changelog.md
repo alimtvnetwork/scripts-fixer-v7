@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented in this file.
 
+## [v0.30.1] -- 2026-04-16
+
+### Fixed
+
+- **Dynamic dev-dir banner in `run.ps1`** -- help banner no longer hardcodes `E:\dev-tool`; now resolves the actual default at runtime using priority order (saved path → E: → D: → best fixed drive ≥ 10GB → system drive). Quiet detection prevents `Write-Log` noise in the help screen.
+
+### Added
+
+- **`spec/ci-cd/readme.md`** -- comprehensive CI/CD pipeline spec with root-cause analysis for 8 known release-pipeline issues (version drift, missing ZIP smoke tests, no automated tagging, etc.) and proposed remediations including a GitHub Actions workflow blueprint.
+
 ## [v0.30.0] -- 2026-04-16
 
 ### Added
