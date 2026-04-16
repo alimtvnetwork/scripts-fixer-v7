@@ -51,7 +51,7 @@
 ## Pending / Next Steps
 
 ### Documentation & Quality
-- [ ] Update CHANGELOG v0.26.0 entry to include speed filter (added after version bump)
+- [ ] Update changelog v0.26.0 entry to include speed filter (added after version bump)
 - [ ] Verify 4-filter chain re-indexing works correctly end-to-end
 - [ ] Verify catalog column alignment with Speed column across all 81 models
 

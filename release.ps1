@@ -78,7 +78,7 @@ $includeItems = @(
     @{ Source = "bump-version.ps1";  Type = "file" }
     @{ Source = "readme.md";         Type = "file" }
     @{ Source = "LICENSE";           Type = "file" }
-    @{ Source = "CHANGELOG.md";      Type = "file" }
+    @{ Source = "changelog.md";      Type = "file" }
 )
 
 $stagingDir = Join-Path $env:TEMP "dev-tools-release-$version"

@@ -18,13 +18,13 @@ type: feature
 | CUDA/AVX2 hardware detection | Done | Get-HardwareProfile in hardware-detect.ps1 |
 | Update spec/model-picker/readme.md | Done | Full 3-filter chain, new model table, speed tier |
 | Update spec/43-install-llama-cpp/readme.md | Done | RAM/Size/Capability filter steps, 81-model count |
-| Bump version to v0.26.0 | Done | version.json + CHANGELOG.md entry |
+| Bump version to v0.26.0 | Done | version.json + changelog.md entry |
 
 ## Pending
 
 | Task | Priority | Notes |
 |------|----------|-------|
-| Update CHANGELOG for speed filter | Medium | Speed filter added after v0.26.0 bump |
+| Update changelog for speed filter | Medium | Speed filter added after v0.26.0 bump |
 | Verify 4-filter re-indexing | Medium | Test RAM -> Size -> Speed -> Capability chain |
 | Verify column alignment | Low | Speed column may shift alignment on long names |
 | Update model-picker spec for speed filter | Medium | Spec currently shows 3-filter, now has 4 |
