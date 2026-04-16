@@ -384,7 +384,7 @@ function Show-RootHelp {
     }
 
     Write-Host "    ID  $("Name".PadRight($nc))  Description" -ForegroundColor DarkGray
-    Write-Host "    --  $("".PadRight($nc, '-'))  $("".PadRight(50, '-'))" -ForegroundColor DarkGray
+    Write-Host "    --  $(''.PadRight($nc, '-'))  $(''.PadRight(50, '-'))" -ForegroundColor DarkGray
     Write-Host ""
     Write-Host "    Core Tools" -ForegroundColor Magenta
     & $printRow "01" "Install VS Code"          "Install Visual Studio Code (Stable/Insiders)"
@@ -466,7 +466,7 @@ function Show-KeywordTable {
     $descCol = 36
 
     Write-Host "    $("Keyword".PadRight($kwCol))$("Description".PadRight($descCol))Script ID" -ForegroundColor DarkGray
-    Write-Host "    $("".PadRight($kwCol, '-'))$("".PadRight($descCol, '-'))---------" -ForegroundColor DarkGray
+    Write-Host "    $(''.PadRight($kwCol, '-'))$(''.PadRight($descCol, '-'))---------" -ForegroundColor DarkGray
 
     Write-Host "    $("vscode, vs-code".PadRight($kwCol))$("VS Code".PadRight($descCol))01"
     Write-Host "    $("choco, chocolatey".PadRight($kwCol))$("Chocolatey".PadRight($descCol))02"
