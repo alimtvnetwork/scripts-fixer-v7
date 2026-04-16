@@ -1,18 +1,18 @@
 # Script 43 -- Install llama.cpp
 
 ## Purpose
-Downloads llama.cpp pre-built binaries (CUDA, AVX2 CPU, KoboldCPP), extracts them to the dev directory, adds binary folders to user PATH, and provides an **interactive model picker** for downloading from a 69-model catalog via aria2c accelerated downloads.
+Downloads llama.cpp pre-built binaries (CUDA, AVX2 CPU, KoboldCPP), extracts them to the dev directory, adds binary folders to user PATH, and provides an **interactive model picker** for downloading from an 81-model catalog via aria2c accelerated downloads.
 
 ## Directory Structure
 ```
 scripts/43-install-llama-cpp/
   config.json           # Executable variants, aria2c config, paths
-  models-catalog.json   # 69-model catalog with rich metadata (separate file)
+  models-catalog.json   # 81-model catalog with rich metadata (separate file)
   log-messages.json     # All log message templates
   run.ps1               # Entry point (param: Command, Path, -Help)
   helpers/
     llama-cpp.ps1       # Install-LlamaCppExecutables, Uninstall-LlamaCpp
-    model-picker.ps1    # Show-ModelCatalog, Read-ModelSelection, Install-SelectedModels, Invoke-ModelInstaller
+    model-picker.ps1    # Show-ModelCatalog, Read-RamFilter, Read-SizeFilter, Read-SpeedFilter, Read-CapabilityFilter, Read-ModelSelection, Install-SelectedModels, Invoke-ModelInstaller
 ```
 
 ## Install Flow

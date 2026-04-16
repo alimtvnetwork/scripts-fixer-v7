@@ -43,6 +43,9 @@
     "40": "40-install-java",
     "41": "41-install-python-libs",
     "42": "42-install-ollama",
-    "43": "43-install-llama-cpp"
+    "43": "43-install-llama-cpp",
+    "44": "44-install-rust",
+    "45": "45-install-docker",
+    "46": "46-install-kubernetes"
   }
 }
