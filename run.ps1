@@ -437,7 +437,52 @@ function Show-RootHelp {
     Write-Host "    $(".\run.ps1 -d -Defaults".PadRight($kc))" -NoNewline; Write-Host "All-dev with defaults, prompt to confirm" -ForegroundColor DarkGray
     Write-Host "    $(".\run.ps1 -d -Defaults -Y".PadRight($kc))" -NoNewline; Write-Host "All-dev with defaults, auto-confirm" -ForegroundColor DarkGray
     Write-Host ""
-    Write-Host "    Default dev directory: " -NoNewline -ForegroundColor DarkGray; Write-Host "E:\dev-tool (smart detection: E: > D: > best drive)" -ForegroundColor White
+
+    # Resolve actual default dev directory dynamically (saved path > smart detect)
+    $resolvedDefault = $null
+    $resolvedSource  = "smart detection: E: > D: > best drive"
+    try {
+        $devDirHelperPath = Join-Path $RootDir "scripts\shared\dev-dir.ps1"
+        $isDevDirHelperPresent = Test-Path $devDirHelperPath
+        if ($isDevDirHelperPresent) {
+            . $devDirHelperPath
+            # Suppress info logs from drive scan during help banner
+            $prevLogLevel = $env:LOG_LEVEL
+            $env:LOG_LEVEL = "silent"
+            try {
+                $savedPath = Get-SavedDevPath
+                $hasSavedPath = $null -ne $savedPath
+                if ($hasSavedPath) {
+                    $resolvedDefault = $savedPath
+                    $resolvedSource  = "saved via .\run.ps1 path"
+                } else {
+                    $bestDrive = Find-BestDevDrive
+                    $hasBestDrive = $null -ne $bestDrive
+                    if ($hasBestDrive) {
+                        $resolvedDefault = "${bestDrive}:\dev-tool"
+                        $resolvedSource  = "auto-detected: ${bestDrive}: drive"
+                    } else {
+                        $resolvedDefault = Get-SafeDevDirFallback
+                        $resolvedSource  = "fallback (no qualified drive >= 10 GB free)"
+                    }
+                }
+            } finally {
+                $env:LOG_LEVEL = $prevLogLevel
+            }
+        }
+    } catch {
+        $resolvedDefault = $null
+    }
+
+    $isResolvedMissing = [string]::IsNullOrWhiteSpace($resolvedDefault)
+    if ($isResolvedMissing) {
+        $resolvedDefault = "C:\dev-tool"
+        $resolvedSource  = "fallback (helper unavailable)"
+    }
+
+    Write-Host "    Default dev directory: " -NoNewline -ForegroundColor DarkGray
+    Write-Host "$resolvedDefault " -NoNewline -ForegroundColor White
+    Write-Host "($resolvedSource)" -ForegroundColor DarkGray
     Write-Host "    Override with: " -NoNewline -ForegroundColor DarkGray; Write-Host ".\run.ps1 -I 12 -- -Path F:\dev-tool" -ForegroundColor White
     Write-Host "    Default VS Code edition: " -NoNewline -ForegroundColor DarkGray; Write-Host "Stable" -ForegroundColor White
     Write-Host "    Default sync mode: " -NoNewline -ForegroundColor DarkGray; Write-Host "Overwrite" -ForegroundColor White
