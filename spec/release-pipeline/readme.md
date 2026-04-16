@@ -45,7 +45,7 @@
 
 1. Reads version from `.gitmap/release/latest.json`
 2. Creates `.release/` directory if missing
-3. Stages `scripts/`, `run.ps1`, `bump-version.ps1`, `readme.md`, `LICENSE`, `CHANGELOG.md` into a temp directory
+3. Stages `scripts/`, `run.ps1`, `bump-version.ps1`, `readme.md`, `LICENSE`, `changelog.md` into a temp directory
 4. Compresses staged files into `dev-tools-setup-v<version>.zip`
 5. Reports file count and ZIP size
 6. Cleans up the staging directory
