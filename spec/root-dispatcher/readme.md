@@ -16,17 +16,24 @@ Chocolatey packages.
 
 ## One-Liner Install
 
-New machines can bootstrap the entire project with a single PowerShell command:
+### Windows (PowerShell)
 
 ```powershell
 irm https://raw.githubusercontent.com/alimtvnetwork/scripts-fixer-v7/main/install.ps1 | iex
 ```
 
+### Unix / macOS (Bash)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/scripts-fixer-v7/main/install.sh | bash
+```
+
 ### What it does
 
-1. Checks that `git` is available (suggests `winget install Git.Git` if missing)
-2. Clones the repo to `$env:USERPROFILE\scripts-fixer` (or `git pull` if it already exists)
-3. Launches the interactive menu (`.\run.ps1 -d`)
+1. Checks that `git` is available
+2. Clones the repo to `~/scripts-fixer` (or `git pull` if it already exists)
+3. **Windows:** Launches the interactive menu (`.\run.ps1 -d`)
+4. **Unix:** Prints next-step instructions (`cd ~/scripts-fixer && pwsh ./run.ps1 -d`)
 
 ### Behaviour
 
@@ -36,9 +43,10 @@ irm https://raw.githubusercontent.com/alimtvnetwork/scripts-fixer-v7/main/instal
 | Folder doesn't exist | `git clone` into `~/scripts-fixer` |
 | Folder already exists (`.git` present) | `git pull --ff-only` to update |
 | Clone fails (network error) | Prints error, exits |
-| Success | `cd` into folder, runs `.\run.ps1 -d` |
+| Success (Windows) | `cd` into folder, runs `.\run.ps1 -d` |
+| Success (Unix) | Prints `cd` + `pwsh` instructions |
 
-The bootstrap script lives at `install.ps1` in the repo root.
+The bootstrap scripts live at `install.ps1` (Windows) and `install.sh` (Unix) in the repo root.
 
 ---
 
