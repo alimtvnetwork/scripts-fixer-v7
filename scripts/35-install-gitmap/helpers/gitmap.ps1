@@ -245,6 +245,7 @@ function Install-GitmapViaZip {
 
     Write-Log $LogMessages.messages.downloadingInstaller -Level "info"
 
+    $isRemoteSuccess = $true
     try {
         Write-Log $LogMessages.messages.runningInstaller -Level "info"
 
@@ -259,7 +260,16 @@ function Install-GitmapViaZip {
         Write-FileError -FilePath $GitmapConfig.installUrl -Operation "remote-install" -Reason "Remote installer failed: $errMsg" -Module "Install-Gitmap"
         Write-Log ($LogMessages.messages.installFailed -replace '\{error\}', $errMsg) -Level "error"
         Write-Log "Stack trace: $errStack" -Level "error"
-        return $false
+        $isRemoteSuccess = $false
+    }
+
+    # If remote installer failed or gitmap still not found, try ZIP fallback
+    if (-not $isRemoteSuccess) {
+        Write-Log $LogMessages.messages.remoteInstallerFailed -Level "warn"
+        $isZipSuccess = Install-GitmapViaZip -InstallDir $installDir -GitmapConfig $GitmapConfig -LogMessages $LogMessages
+        if (-not $isZipSuccess) {
+            return $false
+        }
     }
 
     # Refresh PATH
