@@ -14,6 +14,34 @@ Chocolatey packages.
 
 ---
 
+## One-Liner Install
+
+New machines can bootstrap the entire project with a single PowerShell command:
+
+```powershell
+irm https://raw.githubusercontent.com/alimtvnetwork/scripts-fixer-v7/main/install.ps1 | iex
+```
+
+### What it does
+
+1. Checks that `git` is available (suggests `winget install Git.Git` if missing)
+2. Clones the repo to `$env:USERPROFILE\scripts-fixer` (or `git pull` if it already exists)
+3. Launches the interactive menu (`.\run.ps1 -d`)
+
+### Behaviour
+
+| Condition | Action |
+|-----------|--------|
+| Git not installed | Prints error with install hint, exits |
+| Folder doesn't exist | `git clone` into `~/scripts-fixer` |
+| Folder already exists (`.git` present) | `git pull --ff-only` to update |
+| Clone fails (network error) | Prints error, exits |
+| Success | `cd` into folder, runs `.\run.ps1 -d` |
+
+The bootstrap script lives at `install.ps1` in the repo root.
+
+---
+
 ## Usage
 
 ```powershell
