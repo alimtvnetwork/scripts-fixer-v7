@@ -11,9 +11,32 @@ Script 35 installs the **GitMap CLI** -- a Git repository navigator tool for Win
 .\run.ps1 install gitmap
 .\run.ps1 -I 35
 
+# Pin a specific release version (overrides config.fallbackTag at runtime)
+.\run.ps1 -I 35 -Version v1.2.0
+.\run.ps1 install gitmap -Version v1.0.0
+
 # Direct remote install (standalone)
 irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v3/main/gitmap/scripts/install.ps1 | iex
 ```
+
+## `--Version` Flag
+
+Pin gitmap to a specific release tag. When provided, the value overrides
+`gitmap.fallbackTag` from `config.json` for this run only (config file is not
+modified). The pinned tag is used by the ZIP fallback path when the remote
+installer fails or is unreachable.
+
+| Example | Behavior |
+|---------|----------|
+| `.\run.ps1 -I 35` | Uses `fallbackTag` from config (default `latest`) |
+| `.\run.ps1 -I 35 -Version v1.2.0` | Forces tag `v1.2.0` for this run |
+| `.\run.ps1 install gitmap -Version v1.0.0` | Same, via dispatcher keyword |
+| `.\run.ps1 -I 35 -- -Help` | Shows help including `-Version` flag |
+
+Notes:
+- Tag must match an existing release in `alimtvnetwork/gitmap-v3` (e.g. `v1.2.0`).
+- Use `latest` to resolve the newest release via the GitHub API.
+- The flag has no effect if the remote installer succeeds and pins its own version internally.
 
 ## Config (`config.json`)
 
