@@ -233,6 +233,14 @@ directory post-install.
 | 29 | LiteDB | .NET embedded NoSQL file-based database |
 | 31 | PowerShell Context Menu | Add PowerShell right-click context menu |
 | 38 | Flutter | Flutter SDK, Android Studio, Chrome, VS Code extensions |
+| 39 | .NET SDK | Install .NET SDK (6/8/9), configure dotnet CLI |
+| 40 | Java (OpenJDK) | Install OpenJDK via Chocolatey (17/21) |
+| 41 | Python Libraries | Install pip packages: ML, viz, web, jupyter (by group) |
+| 42 | Ollama | Install Ollama for local LLMs, configure models directory |
+| 43 | llama.cpp | Download llama.cpp binaries (CUDA/AVX2/KoboldCPP), GGUF models |
+| 44 | Rust | Install Rust via rustup, configure cargo |
+| 45 | Docker Desktop | Install Docker Desktop, enable WSL2 backend |
+| 46 | Kubernetes Tools | Install kubectl, minikube, Helm, k9s |
 
 ## Summary Output
 
