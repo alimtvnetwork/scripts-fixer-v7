@@ -439,45 +439,64 @@ function Show-RootHelp {
     Write-Host ""
 
     # Resolve actual default dev directory dynamically (saved path > smart detect)
+    # Quiet inline detection -- avoids the noisy logging in Find-BestDevDrive.
     $resolvedDefault = $null
-    $resolvedSource  = "smart detection: E: > D: > best drive"
+    $resolvedSource  = $null
     try {
         $devDirHelperPath = Join-Path $RootDir "scripts\shared\dev-dir.ps1"
         $isDevDirHelperPresent = Test-Path $devDirHelperPath
         if ($isDevDirHelperPresent) {
             . $devDirHelperPath
-            # Suppress info logs from drive scan during help banner
-            $prevLogLevel = $env:LOG_LEVEL
-            $env:LOG_LEVEL = "silent"
-            try {
-                $savedPath = Get-SavedDevPath
-                $hasSavedPath = $null -ne $savedPath
-                if ($hasSavedPath) {
-                    $resolvedDefault = $savedPath
-                    $resolvedSource  = "saved via .\run.ps1 path"
-                } else {
-                    $bestDrive = Find-BestDevDrive
-                    $hasBestDrive = $null -ne $bestDrive
-                    if ($hasBestDrive) {
-                        $resolvedDefault = "${bestDrive}:\dev-tool"
-                        $resolvedSource  = "auto-detected: ${bestDrive}: drive"
-                    } else {
-                        $resolvedDefault = Get-SafeDevDirFallback
-                        $resolvedSource  = "fallback (no qualified drive >= 10 GB free)"
-                    }
-                }
-            } finally {
-                $env:LOG_LEVEL = $prevLogLevel
+            $savedPath = Get-SavedDevPath
+            $hasSavedPath = $null -ne $savedPath
+            if ($hasSavedPath) {
+                $resolvedDefault = $savedPath
+                $resolvedSource  = "saved via .\run.ps1 path"
             }
         }
-    } catch {
-        $resolvedDefault = $null
-    }
+    } catch {}
 
     $isResolvedMissing = [string]::IsNullOrWhiteSpace($resolvedDefault)
     if ($isResolvedMissing) {
-        $resolvedDefault = "C:\dev-tool"
-        $resolvedSource  = "fallback (helper unavailable)"
+        # Quiet drive scan: E: > D: > best non-system fixed drive >= 10 GB free
+        $minFreeGB = 10
+        $sysLetter = if ([string]::IsNullOrWhiteSpace($env:SystemDrive)) { "C" } else { $env:SystemDrive.TrimEnd('\').Substring(0, 1) }
+        $bestLetter = $null
+        $bestSource = $null
+        try {
+            $disks = Get-CimInstance -ClassName Win32_LogicalDisk -Filter "DriveType=3" -ErrorAction Stop
+            $diskMap = @{}
+            foreach ($d in $disks) {
+                $letter = $d.DeviceID.Substring(0, 1)
+                $freeGB = [math]::Round($d.FreeSpace / 1GB, 1)
+                $diskMap[$letter] = $freeGB
+            }
+            $hasGoodE = $diskMap.ContainsKey("E") -and $diskMap["E"] -ge $minFreeGB
+            $hasGoodD = $diskMap.ContainsKey("D") -and $diskMap["D"] -ge $minFreeGB
+            if ($hasGoodE) {
+                $bestLetter = "E"; $bestSource = "auto-detected: E: drive ($($diskMap['E']) GB free)"
+            } elseif ($hasGoodD) {
+                $bestLetter = "D"; $bestSource = "auto-detected: D: drive ($($diskMap['D']) GB free)"
+            } else {
+                $best = $diskMap.GetEnumerator() |
+                    Where-Object { $_.Key -ne $sysLetter -and $_.Key -ne "E" -and $_.Key -ne "D" -and $_.Value -ge $minFreeGB } |
+                    Sort-Object Value -Descending | Select-Object -First 1
+                $hasBest = $null -ne $best
+                if ($hasBest) {
+                    $bestLetter = $best.Key
+                    $bestSource = "auto-detected: $($best.Key): drive ($($best.Value) GB free)"
+                }
+            }
+        } catch {}
+
+        $hasBestLetter = $null -ne $bestLetter
+        if ($hasBestLetter) {
+            $resolvedDefault = "${bestLetter}:\dev-tool"
+            $resolvedSource  = $bestSource
+        } else {
+            $resolvedDefault = "${sysLetter}:\dev-tool"
+            $resolvedSource  = "fallback to system drive (no qualified drive >= $minFreeGB GB free)"
+        }
     }
 
     Write-Host "    Default dev directory: " -NoNewline -ForegroundColor DarkGray
