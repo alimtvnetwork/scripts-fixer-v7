@@ -99,7 +99,109 @@ function Get-GitmapVersion {
     return $null
 }
 
-function Install-Gitmap {
+function Install-GitmapViaZip {
+    <#
+    .SYNOPSIS
+        Fallback installer: downloads a tagged release ZIP from GitHub,
+        extracts the binary to the install directory, and adds it to PATH.
+        Returns $true on success, $false on failure.
+    #>
+    param(
+        [string]$InstallDir,
+        [PSCustomObject]$GitmapConfig,
+        $LogMessages
+    )
+
+    # Build ZIP URL from config template
+    $tag = $GitmapConfig.fallbackTag
+    $hasTag = -not [string]::IsNullOrWhiteSpace($tag)
+    if (-not $hasTag) { $tag = "latest" }
+
+    $zipUrlTemplate = $GitmapConfig.releaseZipUrl
+    $hasTemplate = -not [string]::IsNullOrWhiteSpace($zipUrlTemplate)
+    if (-not $hasTemplate) {
+        $zipUrlTemplate = "https://github.com/$($GitmapConfig.repo)/releases/download/{tag}/gitmap-windows-amd64.zip"
+    }
+
+    # For "latest", resolve the redirect to get the actual tag
+    $isLatest = $tag -eq "latest"
+    if ($isLatest) {
+        $apiUrl = "https://api.github.com/repos/$($GitmapConfig.repo)/releases/latest"
+        try {
+            $release = Invoke-RestMethod -Uri $apiUrl -UseBasicParsing -Headers @{ "User-Agent" = "gitmap-installer" }
+            $tag = $release.tag_name
+        } catch {
+            # If API fails, try direct download URL pattern
+            $zipUrl = "https://github.com/$($GitmapConfig.repo)/releases/latest/download/gitmap-windows-amd64.zip"
+            Write-Log "Could not resolve latest tag, trying direct URL: $zipUrl" -Level "warn"
+        }
+    }
+
+    # Build final URL if not already set by latest-fallback
+    $hasZipUrl = -not [string]::IsNullOrWhiteSpace($zipUrl)
+    if (-not $hasZipUrl) {
+        $zipUrl = $zipUrlTemplate -replace '\{tag\}', $tag
+    }
+
+    Write-Log ($LogMessages.messages.downloadingZip -replace '\{url\}', $zipUrl) -Level "info"
+
+    $tempZip  = Join-Path $env:TEMP "gitmap-release.zip"
+    $tempDir  = Join-Path $env:TEMP "gitmap-extract"
+
+    try {
+        # Download ZIP
+        Invoke-WebRequest -Uri $zipUrl -OutFile $tempZip -UseBasicParsing
+
+        # Clean previous extract
+        $hasTempDir = Test-Path $tempDir
+        if ($hasTempDir) { Remove-Item $tempDir -Recurse -Force }
+
+        # Extract
+        Expand-Archive -Path $tempZip -DestinationPath $tempDir -Force
+        Write-Log ($LogMessages.messages.zipExtracted -replace '\{path\}', $tempDir) -Level "info"
+
+        # Ensure install directory exists
+        $hasInstallDir = Test-Path $InstallDir
+        if (-not $hasInstallDir) {
+            New-Item -ItemType Directory -Path $InstallDir -Force | Out-Null
+        }
+
+        # Copy binary -- handle nested folder structure
+        $exeFiles = Get-ChildItem -Path $tempDir -Recurse -Filter "gitmap.exe"
+        $hasExe = $exeFiles.Count -gt 0
+        if ($hasExe) {
+            Copy-Item -Path $exeFiles[0].FullName -Destination (Join-Path $InstallDir "gitmap.exe") -Force
+        } else {
+            # Copy everything if no specific exe found
+            Copy-Item -Path "$tempDir\*" -Destination $InstallDir -Recurse -Force
+        }
+
+        # Add to user PATH if not already there
+        $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
+        $isInPath = $userPath -split ";" | Where-Object { $_ -eq $InstallDir }
+        $isAlreadyInPath = $null -ne $isInPath -and @($isInPath).Count -gt 0
+        if (-not $isAlreadyInPath) {
+            [Environment]::SetEnvironmentVariable("Path", "$userPath;$InstallDir", "User")
+        }
+
+        return $true
+
+    } catch {
+        $errMsg   = $_.Exception.Message
+        $errStack = $_.ScriptStackTrace
+        Write-FileError -FilePath $zipUrl -Operation "zip-fallback" -Reason "ZIP download/extract failed: $errMsg" -Module "Install-GitmapViaZip"
+        Write-Log ($LogMessages.messages.zipFallbackFailed -replace '\{error\}', $errMsg) -Level "error"
+        Write-Log "Stack trace: $errStack" -Level "error"
+        return $false
+    } finally {
+        # Cleanup temp files
+        $hasTempZip = Test-Path $tempZip
+        if ($hasTempZip) { Remove-Item $tempZip -Force -ErrorAction SilentlyContinue }
+        $hasTempDir = Test-Path $tempDir
+        if ($hasTempDir) { Remove-Item $tempDir -Recurse -Force -ErrorAction SilentlyContinue }
+    }
+}
+
     <#
     .SYNOPSIS
         Installs gitmap CLI via the remote install.ps1 from GitHub.
