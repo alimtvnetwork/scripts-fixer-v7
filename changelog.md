@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented in this file.
 
+## [v0.29.0] -- 2026-04-16
+
+### Added
+
+- **Orchestrator groups w/x** -- added DevOps (07,45-46) and Container Dev (45-46) group shortcuts to script 12 config
+- **Scripts 44-46 in orchestrator** -- Rust, Docker, Kubernetes now appear in interactive install-all menu, sequence, and Everything group
+
 ## [v0.28.0] -- 2026-04-16
 
 ### Added
