@@ -18,10 +18,16 @@
 
 ## Quick Start
 
-### One-liner install
+### One-liner install (Windows)
 
 ```powershell
 irm https://raw.githubusercontent.com/alimtvnetwork/scripts-fixer-v7/main/install.ps1 | iex
+```
+
+### One-liner install (Unix / macOS)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/scripts-fixer-v7/main/install.sh | bash
 ```
 
 ### Manual clone
