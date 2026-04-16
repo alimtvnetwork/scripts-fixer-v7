@@ -26,6 +26,8 @@ irm https://raw.githubusercontent.com/alimtvnetwork/gitmap-v3/main/gitmap/script
 | `gitmap.verifyCommand` | Command to check if GitMap is installed  |
 | `gitmap.installUrl`  | URL to the remote install.ps1              |
 | `gitmap.repo`        | GitHub repository                          |
+| `gitmap.releaseZipUrl` | URL template for ZIP fallback (`{tag}` placeholder) |
+| `gitmap.fallbackTag` | Tag for ZIP fallback (`latest` resolves via API) |
 | `gitmap.installDir`  | Override install directory (bypasses devDir)|
 
 Default install directory: `C:\dev-tool\GitMap` (resolved via `devDir` config).
@@ -61,8 +63,13 @@ The resolved path is passed as `-InstallDir` to the remote installer script.
 2. If not found, resolves install directory via devDir system
 3. Downloads `install.ps1` from GitHub via `Invoke-RestMethod`
 4. Executes the installer script with `-InstallDir <resolved-path>`
-5. Refreshes PATH and verifies installation
-6. Saves resolved state (includes installDir)
+5. **If remote installer fails** -- falls back to ZIP download:
+   - Resolves tag via GitHub API (or uses `fallbackTag` from config)
+   - Downloads `gitmap-windows-amd64.zip` from releases
+   - Extracts `gitmap.exe` to install directory
+   - Adds install directory to user PATH
+6. Refreshes PATH and verifies installation
+7. Saves resolved state (includes installDir)
 
 ## Keywords
 
