@@ -25,6 +25,10 @@
     "uninstallFailed": "Docker Desktop uninstall failed -- may need manual removal.",
     "uninstallComplete": "Uninstall complete. Docker removed, tracking purged."
   },
+  "versionDetect": [
+    { "command": "docker",         "flag": "--version",       "label": "docker" },
+    { "command": "docker-compose", "flag": "--version",       "label": "docker-compose" }
+  ],
   "help": {
     "commands": {
       "all": "Install Docker Desktop + verify daemon + PATH setup (default)",

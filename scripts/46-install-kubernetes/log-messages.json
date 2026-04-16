@@ -29,6 +29,11 @@
     "uninstallFailed": "{name} uninstall failed -- may need manual removal.",
     "uninstallComplete": "Uninstall complete. Kubernetes tools removed, tracking purged."
   },
+  "versionDetect": [
+    { "command": "kubectl",  "flag": "version --client --short", "label": "kubectl" },
+    { "command": "minikube", "flag": "version --short",          "label": "minikube" },
+    { "command": "helm",     "flag": "version --short",          "label": "helm" }
+  ],
   "help": {
     "commands": {
       "all": "Install kubectl + minikube + Helm (default)",
