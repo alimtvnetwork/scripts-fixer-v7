@@ -554,6 +554,22 @@ function Show-KeywordTable {
     Write-Host "    $("dbeaver-settings".PadRight($kwCol))$("DBeaver Settings (settings only)".PadRight($descCol))32"
     Write-Host "    $("install-dbeaver".PadRight($kwCol))$("Install DBeaver (install only)".PadRight($descCol))32"
     Write-Host ""
+    Write-Host "    AI & Local LLM" -ForegroundColor Magenta
+    Write-Host "    $("ollama, local-llm".PadRight($kwCol))$("Ollama (local LLM runner)".PadRight($descCol))42"
+    Write-Host "    $("llama-cpp, llamacpp".PadRight($kwCol))$("llama.cpp + KoboldCPP".PadRight($descCol))43"
+    Write-Host "    $("llama, gguf".PadRight($kwCol))$("llama.cpp (alias)".PadRight($descCol))43"
+    Write-Host "    $("ai-tools, local-ai".PadRight($kwCol))$("Ollama + llama.cpp".PadRight($descCol))42, 43"
+    Write-Host "    $("ollama+llama".PadRight($kwCol))$("Ollama + llama.cpp".PadRight($descCol))42, 43"
+    Write-Host "    $("ai-full, aifull".PadRight($kwCol))$("Python + libs + Ollama + llama.cpp".PadRight($descCol))05, 41, 42, 43"
+    Write-Host ""
+    Write-Host "    DevOps & Containers" -ForegroundColor Magenta
+    Write-Host "    $("rust, cargo".PadRight($kwCol))$("Rust + Cargo".PadRight($descCol))44"
+    Write-Host "    $("docker".PadRight($kwCol))$("Docker Desktop".PadRight($descCol))45"
+    Write-Host "    $("kubernetes, k8s".PadRight($kwCol))$("Kubernetes tools".PadRight($descCol))46"
+    Write-Host "    $("devops".PadRight($kwCol))$("Git + Docker + Kubernetes".PadRight($descCol))07, 45, 46"
+    Write-Host "    $("container-dev".PadRight($kwCol))$("Docker + Kubernetes".PadRight($descCol))45, 46"
+    Write-Host "    $("systems-dev".PadRight($kwCol))$("C++ + Rust".PadRight($descCol))09, 44"
+    Write-Host ""
 
     Write-Host "  Combo Shortcuts:" -ForegroundColor Yellow
     Write-Host ""
