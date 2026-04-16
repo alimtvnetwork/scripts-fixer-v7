@@ -1,6 +1,6 @@
 # Project Plan -- Dev Tools Setup
 
-## Current Version: v0.26.0
+## Current Version: v0.27.0
 ## Last Updated: 2026-04-16
 
 ---
@@ -30,7 +30,7 @@
 - [x] .installed/ tracking for models
 - [x] Capability filter (coding, reasoning, writing, chat, voice, multilingual)
 
-### v0.26.0 (Done -- Current)
+### v0.26.0 (Done)
 - [x] Expanded catalog from 69 to 81 models (12 new small/fast models)
 - [x] RAM filter (auto-detect system RAM or manual tier selection)
 - [x] Download size filter (Tiny/Small/Medium/Large/XLarge tiers)
@@ -39,6 +39,12 @@
 - [x] 4-filter chain: RAM -> Size -> Speed -> Capability
 - [x] CUDA + AVX2 hardware detection for executable variants
 - [x] Updated specs: model-picker, script 43
+
+### v0.27.0 (Done -- Current)
+- [x] AI onboarding protocol (.lovable/prompts/01-read-prompt.md)
+- [x] Created overview.md, strictly-avoid.md, suggestions.md
+- [x] Created prompt.md index and prompts/ folder
+- [x] Updated memory index with all memory files
 
 ---
 
