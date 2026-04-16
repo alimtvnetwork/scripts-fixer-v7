@@ -27,6 +27,11 @@
     "uninstallFailed": "Rust uninstall failed -- may need manual removal.",
     "uninstallComplete": "Uninstall complete. Rust removed, tracking purged."
   },
+  "versionDetect": [
+    { "command": "rustc",  "flag": "--version", "label": "rustc" },
+    { "command": "cargo",  "flag": "--version", "label": "cargo" },
+    { "command": "rustup", "flag": "--version", "label": "rustup" }
+  ],
   "help": {
     "commands": {
       "all": "Install Rust + components + PATH setup (default)",

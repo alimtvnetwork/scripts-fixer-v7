@@ -70,6 +70,39 @@ function Show-ScriptHelp {
     Write-Host $headerLine -ForegroundColor Cyan
     $descLine = $slm.messages.helpDescription -replace '\{description\}', $Description
     Write-Host $descLine -ForegroundColor Gray
+
+    # -- Version detection (versionDetect array in log-messages.json) ----------
+    $hasVersionDetect = $LogMessages -and $LogMessages.PSObject.Properties.Name -contains "versionDetect"
+    if ($hasVersionDetect) {
+        Write-Host ""
+        foreach ($probe in $LogMessages.versionDetect) {
+            $probeCmd  = $probe.command
+            $probeFlag = if ($probe.PSObject.Properties.Name -contains "flag") { $probe.flag } else { "--version" }
+            $probeLabel = if ($probe.PSObject.Properties.Name -contains "label") { $probe.label } else { $probeCmd }
+
+            $cmdInfo = Get-Command $probeCmd -ErrorAction SilentlyContinue
+            $isCmdFound = $null -ne $cmdInfo
+            if ($isCmdFound) {
+                $rawVersion = $null
+                $flagArgs = $probeFlag -split '\s+'
+                try { $rawVersion = & $probeCmd @flagArgs 2>$null } catch {}
+
+                $versionText = "$rawVersion".Trim()
+                $hasVersion = -not [string]::IsNullOrWhiteSpace($versionText)
+                if ($hasVersion) {
+                    Write-Host "    $probeLabel : " -NoNewline -ForegroundColor Gray
+                    Write-Host $versionText -ForegroundColor Green
+                } else {
+                    Write-Host "    $probeLabel : " -NoNewline -ForegroundColor Gray
+                    Write-Host "(installed, version unknown)" -ForegroundColor Yellow
+                }
+            } else {
+                Write-Host "    $probeLabel : " -NoNewline -ForegroundColor Gray
+                Write-Host "not installed" -ForegroundColor DarkGray
+            }
+        }
+    }
+
     Write-Host ""
 
     if ($Commands.Count -gt 0) {

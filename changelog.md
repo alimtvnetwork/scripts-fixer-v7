@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented in this file.
 
+## [v0.30.0] -- 2026-04-16
+
+### Added
+
+- **Version detection in help display** -- `Show-ScriptHelp` now probes installed tool versions via `versionDetect` array in log-messages.json; installed versions show in green, missing tools in gray
+- **versionDetect config** -- added to scripts 44 (rustc, cargo, rustup), 45 (docker, docker-compose), and 46 (kubectl, minikube, helm)
+- Multi-word flag support in version probing (flags split via splatting)
+
 ## [v0.29.0] -- 2026-04-16
 
 ### Added
