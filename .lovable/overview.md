@@ -47,4 +47,4 @@ Automated installer and configurator for developer tools on Windows. 43 PowerShe
 - **Prompts:** `.lovable/prompts/`
 - **Script registry:** `scripts/registry.json`
 - **Version:** `scripts/version.json`
-- **Changelog:** `CHANGELOG.md`
+- **Changelog:** `changelog.md`

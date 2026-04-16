@@ -19,7 +19,7 @@
 | `bump-version.ps1` | File      | Version bump utility                     |
 | `readme.md`        | File      | Project readme                           |
 | `LICENSE`          | File      | License file                             |
-| `CHANGELOG.md`     | File      | Changelog                                |
+| `changelog.md`     | File      | Changelog                                |
 
 ## Parameters
 

@@ -100,7 +100,7 @@ Set-Content -Path $versionFile -Value $newData -Encoding UTF8
 
 Write-Host "[ OK ] scripts/version.json: $currentVersion -> $newVersion" -ForegroundColor Green
 
-# ── Update CHANGELOG badge in readme.md ──────────────────────────────────────
+# ── Update changelog badge in readme.md ──────────────────────────────────────
 
 $readmeFile = Join-Path $PSScriptRoot "readme.md"
 $isReadmePresent = Test-Path $readmeFile
