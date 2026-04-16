@@ -202,6 +202,7 @@ function Install-GitmapViaZip {
     }
 }
 
+function Install-Gitmap {
     <#
     .SYNOPSIS
         Installs gitmap CLI via the remote install.ps1 from GitHub.
