@@ -6,9 +6,9 @@
 
 [![PowerShell](https://img.shields.io/badge/PowerShell-5.1%2B-blue?logo=powershell&logoColor=white)](https://docs.microsoft.com/powershell/)
 [![Windows](https://img.shields.io/badge/Windows-10%2F11-0078D6?logo=windows&logoColor=white)](https://www.microsoft.com/windows)
-[![Scripts](https://img.shields.io/badge/Scripts-41-green)](scripts/)
+[![Scripts](https://img.shields.io/badge/Scripts-46-green)](scripts/)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
-[![Changelog](https://img.shields.io/badge/Changelog-v0.25.0-orange)](CHANGELOG.md)
+[![Changelog](https://img.shields.io/badge/Changelog-v0.28.0-orange)](CHANGELOG.md)
 
 *One command to set up your entire dev environment. No manual installs. No guesswork.*
 
@@ -54,9 +54,9 @@ cd scripts-fixture
 
 ## What It Does
 
-A modular collection of **43 PowerShell scripts** that automate everything from installing VS Code, Git, and databases to configuring Go, Python, Node.js, Flutter, .NET, Java, C++, and local AI tools (Ollama, llama.cpp) -- all from a single root dispatcher with an interactive menu and keyword install system.
+A modular collection of **46 PowerShell scripts** that automate everything from installing VS Code, Git, and databases to configuring Go, Python, Node.js, Flutter, .NET, Java, C++, Rust, Docker, Kubernetes, and local AI tools (Ollama, llama.cpp) -- all from a single root dispatcher with an interactive menu and keyword install system.
 
-### Core Tools (01-09, 16-17, 38-43)
+### Core Tools (01-09, 16-17, 38-46)
 
 | ID | Script | What It Does | Admin |
 |----|--------|--------------|-------|
@@ -77,6 +77,9 @@ A modular collection of **43 PowerShell scripts** that automate everything from 
 | 41 | **Python Libraries** | Install pip packages: ML, viz, web, jupyter (by group) | No |
 | 42 | **Ollama** | Install Ollama for local LLMs, configure models directory | Yes |
 | 43 | **llama.cpp** | Download llama.cpp binaries (CUDA/AVX2/KoboldCPP), GGUF models | Yes |
+| 44 | **Rust** | Install Rust toolchain via rustup, clippy, rustfmt, rust-analyzer | Yes |
+| 45 | **Docker Desktop** | Install Docker Desktop via Chocolatey, WSL2 check, Compose v2 | Yes |
+| 46 | **Kubernetes Tools** | Install kubectl, minikube, Helm via Chocolatey | Yes |
 
 ### VS Code Extras (10-11) & Context Menus
 
@@ -282,6 +285,15 @@ Install tools by human-friendly name instead of script ID:
 .\run.ps1 install ai-tools           # Install both Ollama + llama.cpp (42, 43)
 .\run.ps1 install local-ai           # Same as ai-tools (42, 43)
 .\run.ps1 install ai-full            # Python + ML libs + Ollama + llama.cpp (05, 41, 42, 43)
+
+# Rust, Docker, Kubernetes
+.\run.ps1 install rust               # Install Rust via rustup (44)
+.\run.ps1 install docker             # Install Docker Desktop (45)
+.\run.ps1 install kubernetes         # Install kubectl + minikube + Helm (46)
+.\run.ps1 install k8s                # Same as kubernetes (46)
+.\run.ps1 install devops             # Git + Docker + Kubernetes (07, 45, 46)
+.\run.ps1 install container-dev      # Docker + Kubernetes (45, 46)
+.\run.ps1 install systems-dev        # C++ + Rust (09, 44)
 ```
 
 Keywords are case-insensitive, support comma/space separation, auto-deduplicate, and run in sorted order. See `scripts/shared/install-keywords.json` for the full keyword map.
@@ -311,7 +323,7 @@ When you run `.\run.ps1 -d`, you get a full interactive menu with:
 | `k` | Backend Stack | 03, 04, 06, 18-20, 24 |
 | `l` | Full Stack | 03, 04, 06, 07, 16, 18, 20, 22, 24 |
 | `m` | Data Engineering | 05, 20, 27, 28 |
-| `n` | Everything (01-43) | All scripts |
+| `n` | Everything (01-46) | All scripts |
 | `o` | All Dev + MySQL | 01-09, 18 |
 | `p` | All Dev + PostgreSQL | 01-09, 20 |
 | `r` | All Dev + PostgreSQL + Redis | 01-09, 20, 24 |
@@ -319,6 +331,8 @@ When you run `.\run.ps1 -d`, you get a full interactive menu with:
 | `t` | All DBs + DBeaver (18-29,32) | 18-29, 32 |
 | `u` | AI Tools (42-43) | 42, 43 |
 | `v` | AI Full Stack (05,41-43) | 05, 41, 42, 43 |
+| `w` | DevOps (07,45-46) | 07, 45, 46 |
+| `x` | Container Dev (44-46) | 44, 45, 46 |
 
 - **Select All / None** -- `A` to select all, `N` to deselect all
 - **Loop-back** -- after install + summary, returns to the menu
@@ -422,6 +436,9 @@ scripts/
   41-install-python-libs/      # Python pip libraries
   42-install-ollama/           # Ollama local LLM runtime
   43-install-llama-cpp/        # llama.cpp binaries + GGUF models
+  44-install-rust/             # Rust toolchain via rustup
+  45-install-docker/           # Docker Desktop + Compose
+  46-install-kubernetes/       # kubectl + minikube + Helm
   audit/                       # Audit scanner
 spec/                          # Specifications per script
 suggestions/                   # Improvement ideas
@@ -480,6 +497,19 @@ Reusable utilities in `scripts/shared/`:
 
 ## Recent Changes
 
+### v0.28.0 -- Rust, Docker, Kubernetes
+
+- **Script 44 -- Install Rust** -- Rust toolchain via rustup + clippy/rustfmt/rust-analyzer + cargo/bin PATH
+- **Script 45 -- Install Docker** -- Docker Desktop via Chocolatey + WSL2 check + daemon verify
+- **Script 46 -- Install Kubernetes** -- kubectl + minikube + Helm via Chocolatey
+- **New combos** -- `devops` (7+45+46), `container-dev` (45+46), `systems-dev` (9+44)
+
+### v0.26.0 -- 4-Filter Model Picker
+
+- **81-model catalog** -- expanded from 69 to 81 models with new small/fast entries
+- **4-filter chain** -- RAM → Size → Speed → Capability with re-indexing
+- **Speed filter + column** -- inference speed tier based on file size
+
 ### v0.22.1 -- Help Display Overhaul
 
 - **Alignment fixed** -- all keyword tables use consistent PadRight columns for perfect alignment
@@ -487,18 +517,6 @@ Reusable utilities in `scripts/shared/`:
 - **Missing scripts added** -- Flutter (38), .NET (39), Java (40), Windows Terminal (37) in help display
 - **`pylibs` keyword in help** -- appears in Install by Keyword, Keywords table, and Combo Shortcuts
 - **Desktop Tools category** -- renamed from Database Tools, includes all desktop apps
-
-### v0.22.0 -- Smart Drive Detection & pylibs
-
-- **`pylibs` install keyword** -- `.\run.ps1 install pylibs` installs Python + all pip libraries in one command
-- **Smart drive detection** -- Python installer picks drive with most free space (E: > D: > best drive)
-- **config.json uses `installDirSubfolder`** -- full path resolved dynamically at runtime
-
-### v0.4.1 -- Crash-Safe Error Logging
-
-- **try/catch/finally wrapper** in all `run.ps1` files
-- **Warnings captured in error logs** alongside errors
-- **4-tier VS Code exe fallback** (script 10)
 
 ---
 
