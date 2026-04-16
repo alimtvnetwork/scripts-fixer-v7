@@ -11,6 +11,7 @@ All notable changes to this project are documented in this file.
 ### Added
 
 - **`spec/ci-cd/readme.md`** -- comprehensive CI/CD pipeline spec with root-cause analysis for 8 known release-pipeline issues (version drift, missing ZIP smoke tests, no automated tagging, etc.) and proposed remediations including a GitHub Actions workflow blueprint.
+- **`.github/workflows/release.yml`** -- automated release workflow (Issue #7 from `spec/ci-cd`). Triggers on `v*.*.*` tag pushes (and `workflow_dispatch`), verifies tag alignment with `.gitmap/release/latest.json`, warns on `scripts/version.json` drift, builds the ZIP via `release.ps1`, smoke-tests it by extracting and running `run.ps1 -h`, computes SHA256, then uploads the ZIP + `.sha256` to the matching GitHub Release.
 
 ## [v0.30.0] -- 2026-04-16
 
