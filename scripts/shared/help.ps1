@@ -84,7 +84,8 @@ function Show-ScriptHelp {
             $isCmdFound = $null -ne $cmdInfo
             if ($isCmdFound) {
                 $rawVersion = $null
-                try { $rawVersion = & $probeCmd $probeFlag 2>$null } catch {}
+                $flagArgs = $probeFlag -split '\s+'
+                try { $rawVersion = & $probeCmd @flagArgs 2>$null } catch {}
 
                 $versionText = "$rawVersion".Trim()
                 $hasVersion = -not [string]::IsNullOrWhiteSpace($versionText)
