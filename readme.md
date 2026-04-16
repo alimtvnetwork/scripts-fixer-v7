@@ -18,10 +18,17 @@
 
 ## Quick Start
 
+### One-liner install
+
 ```powershell
-# Clone the repo
-git clone https://github.com/alimtvnetwork/scripts-fixer-v6.git scripts-fixture
-cd scripts-fixture
+irm https://raw.githubusercontent.com/alimtvnetwork/scripts-fixer-v7/main/install.ps1 | iex
+```
+
+### Manual clone
+
+```powershell
+git clone https://github.com/alimtvnetwork/scripts-fixer-v7.git scripts-fixer
+cd scripts-fixer
 ```
 
 ```powershell
