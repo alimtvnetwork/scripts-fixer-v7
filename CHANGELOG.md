@@ -2,6 +2,27 @@
 
 All notable changes to this project are documented in this file.
 
+## [v0.28.0] -- 2026-04-16
+
+### Added
+
+- **Script 44 -- Install Rust** -- installs Rust toolchain via rustup-init.exe, configures components (clippy, rustfmt, rust-analyzer), optional WASM target, cargo packages, adds `~/.cargo/bin` to PATH
+- **Script 45 -- Install Docker** -- installs Docker Desktop via Chocolatey, checks WSL2 backend, verifies daemon, shows Docker Compose version, adds to PATH
+- **Script 46 -- Install Kubernetes** -- installs kubectl, minikube, and Helm via Chocolatey with optional Lens IDE, adds tools to PATH
+- **Install keywords** -- `rust`, `rustup`, `cargo`, `docker`, `docker-desktop`, `containers`, `kubernetes`, `kubectl`, `k8s`, `minikube`, `helm`
+- **Combo shortcuts** -- `devops` (7+45+46), `container-dev` (45+46), `systems-dev` (9+44)
+
+### Changed
+
+- **Script count** -- 43 to 46 scripts
+- **Registry updated** -- entries 44, 45, 46 added to `scripts/registry.json`
+
+### Fixed
+
+- **spec/43 model count** -- corrected 69-model references to 81 in spec/43-install-llama-cpp/readme.md
+
+---
+
 ## [v0.26.0] -- 2026-04-16
 
 ### Added
