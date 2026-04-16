@@ -86,10 +86,23 @@ function Resolve-GitmapInstallDir {
     return "C:\dev-tool\GitMap"
 }
 
+function Get-GitmapVersion {
+    <#
+    .SYNOPSIS
+        Returns the installed gitmap version string, or $null if not found.
+    #>
+    try {
+        $raw = & gitmap --version 2>&1
+        $isValid = -not [string]::IsNullOrWhiteSpace($raw)
+        if ($isValid) { return ($raw -replace '^\s*gitmap\s*', '').Trim() }
+    } catch { }
+    return $null
+}
+
 function Install-Gitmap {
     <#
     .SYNOPSIS
-        Installs GitMap CLI via the remote install.ps1 from GitHub.
+        Installs gitmap CLI via the remote install.ps1 from GitHub.
         Uses devDir resolution for the install directory.
         Returns $true on success, $false on failure.
     #>
@@ -109,7 +122,13 @@ function Install-Gitmap {
 
     $isGitmapReady = Test-GitmapInstalled
     if ($isGitmapReady) {
-        Write-Log $LogMessages.messages.found -Level "success"
+        $ver = Get-GitmapVersion
+        $hasVersion = -not [string]::IsNullOrWhiteSpace($ver)
+        if ($hasVersion) {
+            Write-Log ($LogMessages.messages.foundVersion -replace '\{version\}', $ver) -Level "success"
+        } else {
+            Write-Log $LogMessages.messages.found -Level "success"
+        }
         Save-GitmapResolvedState
         return $true
     }
@@ -133,8 +152,11 @@ function Install-Gitmap {
         & $scriptBlock -InstallDir $installDir
 
     } catch {
-        Write-FileError -FilePath $installDir -Operation "inject" -Reason "Remote installer script failed: $($_.Exception.Message)" -Module "Install-Gitmap"
-        Write-Log ($LogMessages.messages.installFailed -replace '\{error\}', $_.Exception.Message) -Level "error"
+        $errMsg   = $_.Exception.Message
+        $errStack = $_.ScriptStackTrace
+        Write-FileError -FilePath $GitmapConfig.installUrl -Operation "remote-install" -Reason "Remote installer failed: $errMsg" -Module "Install-Gitmap"
+        Write-Log ($LogMessages.messages.installFailed -replace '\{error\}', $errMsg) -Level "error"
+        Write-Log "Stack trace: $errStack" -Level "error"
         return $false
     }
 
@@ -143,11 +165,16 @@ function Install-Gitmap {
 
     $isGitmapReady = Test-GitmapInstalled
     if ($isGitmapReady) {
-        Write-Log $LogMessages.messages.installSuccess -Level "success"
+        $ver = Get-GitmapVersion
+        $hasVersion = -not [string]::IsNullOrWhiteSpace($ver)
+        if ($hasVersion) {
+            Write-Log ($LogMessages.messages.installSuccessVersion -replace '\{version\}', $ver) -Level "success"
+        } else {
+            Write-Log $LogMessages.messages.installSuccess -Level "success"
+        }
         Save-GitmapResolvedState -InstallDir $installDir
     } else {
         Write-Log $LogMessages.messages.notInPath -Level "warn"
-        # Still mark as success -- binary may need shell restart to appear in PATH
         Save-GitmapResolvedState -InstallDir $installDir
     }
 
