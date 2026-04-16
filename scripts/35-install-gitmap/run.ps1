@@ -9,6 +9,8 @@ param(
     [Parameter(Position = 1)]
     [string]$Path,
 
+    [string]$Version,
+
     [switch]$Help
 )
 
@@ -58,6 +60,13 @@ if ($isUninstall) {
 }
 
 # -- Install -------------------------------------------------------------------
+# -- Version flag override -- if user passed -Version, override fallbackTag
+$hasVersionFlag = -not [string]::IsNullOrWhiteSpace($Version)
+if ($hasVersionFlag) {
+    Write-Log "Version pinned via --Version flag: $Version" -Level "info"
+    $config.gitmap.fallbackTag = $Version
+}
+
 $ok = Install-Gitmap -GitmapConfig $config.gitmap -DevDirConfig $config.devDir -LogMessages $logMessages
 
 $isSuccess = $ok -eq $true
