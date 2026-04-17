@@ -27,21 +27,42 @@ existing scripts (which already own catalogs, filters, and downloaders).
 | `.\run.ps1 models list llama`                        | List only llama.cpp catalog                                   |
 | `.\run.ps1 models list ollama`                       | List only Ollama defaults                                    |
 | `.\run.ps1 models -Help`                             | Help text                                                    |
+| `.\run.ps1 models search llama`                      | **Live search** of ollama.com/library; pick results to pull  |
+| `.\run.ps1 models search`                            | Prompts for query, then live search                          |
 
 ## File layout
 
 ```
 scripts/models/
-  run.ps1              # Thin dispatcher (this file is intentionally small)
-  config.json          # Backend registry: scriptFolder, catalogFile, idField
-  log-messages.json    # All user-facing strings (per logging convention)
+  run.ps1                  # Thin dispatcher (this file is intentionally small)
+  config.json              # Backend registry: scriptFolder, catalogFile, idField
+  log-messages.json        # All user-facing strings (per logging convention)
   helpers/
-    picker.ps1         # Backend picker, catalog loader, CSV resolver, dispatcher
+    picker.ps1             # Backend picker, catalog loader, CSV resolver, dispatcher
+    ollama-search.ps1      # Live Ollama Hub search + HTML parser + result picker
 ```
 
 `run.ps1` only handles arg parsing + flow control. All real logic lives in
-`helpers/picker.ps1` so the file stays under ~120 lines per the project's
+`helpers/*.ps1` so the file stays under ~200 lines per the project's
 "keep run.ps1 small" rule.
+
+## Ollama Hub search
+
+`.\run.ps1 models search <query>` performs a live HTTP GET against
+`https://ollama.com/search?q=<query>`, parses the result HTML using stable
+`x-test-*` markers (`x-test-model`, `x-test-search-response-title`,
+`x-test-size`, `x-test-capability`, `x-test-pull-count`, `x-test-tag-count`,
+`x-test-updated`), and renders a numbered table. Selection accepts the
+same syntax as the other pickers (`1,3`, `1-5`, `all`, `q`) plus an
+optional `:tag` suffix per pick to target a specific size, e.g. `2:7b`
+pulls `<slug>:7b`. Selected slugs are joined into a CSV and dispatched to
+script 42 via the `OLLAMA_PULL_MODELS` env var (the same handoff used by
+the CSV install path), so unknown slugs become ad-hoc `ollama pull <slug>`
+calls without needing config edits.
+
+The href parser tolerates both absolute (`href="https://ollama.com/library/X"`)
+and relative (`href="/library/X"`) shapes. Network failures and empty
+result sets are logged and return cleanly -- they never throw.
 
 ## Algorithm
 
