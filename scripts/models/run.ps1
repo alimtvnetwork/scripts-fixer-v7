@@ -25,6 +25,7 @@ $scriptsRoot = Split-Path -Parent $scriptDir
 
 # -- Dot-source orchestrator helpers -----------------------------------------
 . (Join-Path $scriptDir "helpers\picker.ps1")
+. (Join-Path $scriptDir "helpers\ollama-search.ps1")
 
 # -- Load config & log messages ----------------------------------------------
 $config      = Import-JsonConfig (Join-Path $scriptDir "config.json")
@@ -45,9 +46,10 @@ try {
     $firstArg = if ($Args -and $Args.Count -gt 0) { $Args[0].Trim() } else { "" }
     $secondArg = if ($Args -and $Args.Count -gt 1) { $Args[1].Trim() } else { "" }
 
-    $isListMode = $List -or $firstArg.ToLower() -eq "list"
+    $isListMode   = $List -or $firstArg.ToLower() -eq "list"
+    $isSearchMode = $firstArg.ToLower() -eq "search"
     $hasInstallParam = -not [string]::IsNullOrWhiteSpace($Install)
-    $hasCsvFirstArg = $firstArg -and $firstArg.ToLower() -ne "list" -and $firstArg -match '[a-z0-9]'
+    $hasCsvFirstArg = $firstArg -and $firstArg.ToLower() -ne "list" -and $firstArg.ToLower() -ne "search" -and $firstArg -match '[a-z0-9]'
 
     # ── List mode ────────────────────────────────────────────────────────
     if ($isListMode) {
@@ -62,6 +64,58 @@ try {
         }
         $label = if ($filter) { $filter } else { "all backends" }
         Show-ModelList -Models $all -BackendLabel $label
+        return
+    }
+
+    # ── Search mode (Ollama Hub) ─────────────────────────────────────────
+    # Usage: .\run.ps1 models search <query>  -- scrapes ollama.com/library
+    # for any pullable model, not just the static defaults in script 42's config.
+    if ($isSearchMode) {
+        $query = $secondArg
+        if ([string]::IsNullOrWhiteSpace($query)) {
+            $query = Read-Host -Prompt "  Search Ollama Hub for"
+        }
+
+        $results = Invoke-OllamaHubSearch -Query $query
+        $hasResults = $results.Count -gt 0
+        if (-not $hasResults) {
+            Write-Log $logMessages.messages.searchNoResults -Level "warn"
+            return
+        }
+
+        Show-OllamaHubResults -Results $results -Query $query
+
+        $picks = Read-OllamaHubSelection -MaxIndex $results.Count
+        if ($null -eq $picks) {
+            Write-Log $logMessages.messages.searchAborted -Level "info"
+            return
+        }
+        if ($picks.Count -eq 0) {
+            Write-Log $logMessages.messages.searchSkipped -Level "info"
+            return
+        }
+
+        # Build CSV of slugs (with optional :tag) and dispatch to script 42 via env var.
+        $slugs = @()
+        foreach ($p in $picks) {
+            $r = $results[$p.Index - 1]
+            $slug = if ($p.Tag) { "$($r.slug):$($p.Tag)" } else { $r.slug }
+            $slugs += $slug
+        }
+        $csvSlugs = $slugs -join ","
+        $line = $logMessages.messages.searchDispatching -replace '\{slugs\}', $csvSlugs
+        Write-Log $line -Level "info"
+
+        $folder = $config.backends.ollama.scriptFolder
+        $target = Join-Path $scriptsRoot $folder "run.ps1"
+        $env:OLLAMA_PULL_MODELS = $csvSlugs
+        try {
+            & $target pull
+        } finally {
+            Remove-Item Env:\OLLAMA_PULL_MODELS -ErrorAction SilentlyContinue
+        }
+
+        Write-Log $logMessages.messages.complete -Level "success"
         return
     }
 
