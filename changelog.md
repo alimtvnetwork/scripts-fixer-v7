@@ -2,6 +2,21 @@
 
 All notable changes to this project are documented in this file.
 
+## [v0.34.0] -- 2026-04-17
+
+### Added
+
+- **`.\run.ps1 models uninstall`** -- new orchestrator subcommand (aliases: `remove`, `rm`) that lists every locally installed model across BOTH backends, multi-select with the same `1,3 | 1-5 | all` syntax used by the install pickers, asks for explicit `yes` confirmation, then deletes via each backend's natural removal path.
+  - llama.cpp side: scans `.installed/model-*.json`, cross-references `43-install-llama-cpp/models-catalog.json` to recover `fileName`/`displayName`/`fileSizeGB`, resolves the GGUF folder from `.resolved/43-install-llama-cpp.json` (falls back to `$env:DEV_DIR/llama-models`), shows whether the file is still on disk, then removes the GGUF + drops the `.installed/` tracking record.
+  - Ollama side: shells out to `ollama list`, parses the column-padded output (`NAME / ID / SIZE / MODIFIED`), then deletes via `ollama rm <id>`. Gracefully handles missing daemon / `ollama` binary -- never throws.
+  - Optional scoping: `.\run.ps1 models uninstall llama` or `.\run.ps1 models uninstall ollama` (also works via `-Backend`).
+  - All logic in new `scripts/models/helpers/uninstall.ps1` (Get-InstalledLlamaCppModels, Get-InstalledOllamaModels, Show-UninstallList, Read-UninstallSelection, Confirm-Uninstall, Invoke-ModelUninstall). `run.ps1` stays a thin dispatcher.
+
+### Changed
+
+- `scripts/models/log-messages.json` adds `uninstallScanning / uninstallNothing / uninstallAborted / uninstallSkipped / uninstallPartial / uninstallComplete` strings; help section gains the three uninstall variants and two new examples.
+- `spec/models/readme.md` updated with the new CLI rows, file layout entry, and an "Uninstall" section describing data sources and deletion semantics.
+
 ## [v0.33.0] -- 2026-04-17
 
 ### Added
