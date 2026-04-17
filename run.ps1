@@ -77,6 +77,8 @@ param(
 
     [switch]$t,
 
+    [switch]$M,
+
     [switch]$Defaults,
 
     [switch]$Y,
@@ -1363,6 +1365,7 @@ if ($hasCommand) {
     $isBareExportCommand  = $normalizedCommand -eq "export"
     $isBareStatusCommand  = $normalizedCommand -eq "status"
     $isBareDoctorCommand  = $normalizedCommand -eq "doctor"
+    $isBareModelsCommand  = $normalizedCommand -eq "models" -or $normalizedCommand -eq "model"
     $isBareScriptId = $normalizedCommand -match '^\d+$'
 
     if ($isBareInstallCommand) {
@@ -1391,6 +1394,11 @@ if ($hasCommand) {
     } elseif ($isBareDoctorCommand) {
         Show-VersionHeader
         Invoke-DoctorCommand
+        exit 0
+    } elseif ($isBareModelsCommand) {
+        Show-VersionHeader
+        $modelsScript = Join-Path $RootDir "scripts\models\run.ps1"
+        & $modelsScript @Install
         exit 0
     } elseif ($isBareUpdateCommand) {
         Show-VersionHeader
