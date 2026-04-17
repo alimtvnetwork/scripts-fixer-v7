@@ -16,6 +16,7 @@
       "-Backend": "Force a backend: llama-cpp or ollama (skips backend prompt; also scopes uninstall)",
       "-Install": "CSV of model ids/slugs to install non-interactively",
       "-List": "List models without installing",
+      "-Force": "Skip the 'yes' confirmation prompt during uninstall (for CI / scripts)",
       "-Help": "Show this help"
     },
     "examples": [
@@ -28,7 +29,8 @@
       ".\\run.ps1 models list llama",
       ".\\run.ps1 models uninstall",
       ".\\run.ps1 models uninstall ollama",
-      ".\\run.ps1 models rm"
+      ".\\run.ps1 models rm",
+      ".\\run.ps1 models uninstall -Force"
     ]
   },
   "messages": {
@@ -49,6 +51,7 @@
     "uninstallNothing": "No locally installed models found. Nothing to uninstall.",
     "uninstallAborted": "Uninstall aborted by user. Nothing was deleted.",
     "uninstallSkipped": "No selection made. Nothing was deleted.",
+    "uninstallForceSkip": "  -Force flag set: skipping confirmation prompt.",
     "uninstallPartial": "Uninstall finished with one or more failures -- review the log above.",
     "uninstallComplete": "Uninstall complete.",
     "complete": "Models setup complete."
