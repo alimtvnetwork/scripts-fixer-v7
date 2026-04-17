@@ -138,8 +138,39 @@ function Pull-OllamaModels {
     )
 
     $models = $Config.defaultModels
-
     $isOrchestratorRun = $env:SCRIPTS_ROOT_RUN -eq "1"
+
+    # -- Honor OLLAMA_PULL_MODELS env var (set by scripts/models orchestrator) --
+    # When present, restrict the pull list to the given CSV slugs and run
+    # non-interactively. Unknown slugs become ad-hoc pulls so users can
+    # request models that aren't in defaultModels (e.g. "phi3:mini").
+    $csv = $env:OLLAMA_PULL_MODELS
+    $hasCsvOverride = -not [string]::IsNullOrWhiteSpace($csv)
+    if ($hasCsvOverride) {
+        Write-Log "OLLAMA_PULL_MODELS detected: $csv -- non-interactive mode" -Level "info"
+        $requestedSlugs = @($csv -split '[,\s]+' | Where-Object { $_.Length -gt 0 } | ForEach-Object { $_.Trim() })
+
+        $resolved = @()
+        foreach ($slug in $requestedSlugs) {
+            $needle = $slug.ToLower()
+            $hit = $models | Where-Object { $_.slug.ToLower() -eq $needle -or $_.pullCommand.ToLower() -eq $needle } | Select-Object -First 1
+            if ($hit) {
+                $resolved += $hit
+            } else {
+                # Ad-hoc pull -- synthesize a minimal model object
+                Write-Log "Slug '$slug' not in defaults, treating as ad-hoc Ollama pull." -Level "info"
+                $resolved += [PSCustomObject]@{
+                    slug        = $slug
+                    displayName = $slug
+                    pullCommand = $slug
+                    sizeHint    = "unknown"
+                    purpose     = "ad-hoc"
+                }
+            }
+        }
+        $models = $resolved
+        $isOrchestratorRun = $true  # Force non-interactive
+    }
 
     foreach ($model in $models) {
         # Under orchestrator, auto-accept all model pulls

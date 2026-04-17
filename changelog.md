@@ -2,6 +2,15 @@
 
 All notable changes to this project are documented in this file.
 
+## [v0.33.0] -- 2026-04-17
+
+### Added
+
+- **Env-var handoff for non-interactive CSV installs** -- scripts 42 (Ollama) and 43 (llama.cpp) now honor the env vars set by `scripts/models/helpers/picker.ps1`, completing the orchestrator contract documented in `spec/models/readme.md`.
+  - `Pull-OllamaModels` reads `OLLAMA_PULL_MODELS` (CSV of slugs), resolves each against `defaultModels` first then falls back to ad-hoc `ollama pull <slug>` for unknown ids (so users can request anything from ollama.com/library), and forces non-interactive mode -- no per-model yes/no prompt.
+  - `Invoke-ModelInstaller` (llama.cpp) reads `LLAMA_CPP_INSTALL_IDS` (CSV), matches each id against the catalog (exact then `-like *id*`), skips the RAM/size/speed/capability filter prompts entirely, re-indexes the matched subset, and goes straight to download. Unmatched ids are logged and skipped; an empty match list aborts cleanly.
+- Result: `.\run.ps1 models qwen2.5-coder-3b,llama3.2,deepseek-r1:8b` is now end-to-end non-interactive across both backends.
+
 ## [v0.32.0] -- 2026-04-17
 
 ### Added
