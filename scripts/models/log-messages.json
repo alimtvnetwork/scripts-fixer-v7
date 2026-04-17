@@ -7,7 +7,8 @@
       "<csv>": "Direct install: comma-separated model ids (e.g. qwen2.5-coder-3b,llama3.2)",
       "list": "Show all known models (both backends) with ids",
       "list llama": "Show only llama.cpp catalog",
-      "list ollama": "Show only Ollama defaults"
+      "list ollama": "Show only Ollama defaults",
+      "search <query>": "Search Ollama Hub (ollama.com/library) live and pick models to pull"
     },
     "parameters": {
       "-Backend": "Force a backend: llama-cpp or ollama (skips backend prompt)",
@@ -22,7 +23,9 @@
       ".\\run.ps1 models qwen2.5-coder-3b,llama-3.1-8b-instruct",
       ".\\run.ps1 models -Backend ollama -Install llama3.2,qwen2.5-coder",
       ".\\run.ps1 models list",
-      ".\\run.ps1 models list llama"
+      ".\\run.ps1 models list llama",
+      ".\\run.ps1 models search llama",
+      ".\\run.ps1 models search phi3"
     ]
   },
   "messages": {
@@ -39,6 +42,10 @@
     "csvUnknown": "  [MISS] {id} -- not found in any catalog",
     "csvNoneFound": "None of the requested model ids matched any catalog. Use 'list' to see available ids.",
     "listHeader": "Available models ({backend}):",
+    "searchNoResults": "Ollama Hub returned no results. Try a different query or check your connection.",
+    "searchAborted": "Search aborted by user.",
+    "searchSkipped": "No models selected from search results -- nothing to pull.",
+    "searchDispatching": "  Pulling from Ollama Hub: {slugs}",
     "complete": "Models setup complete."
   }
 }
