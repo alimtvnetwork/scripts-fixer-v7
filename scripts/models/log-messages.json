@@ -1,0 +1,44 @@
+{
+  "scriptName": "Models Orchestrator",
+  "description": "Pick a model backend (llama.cpp or Ollama), then browse, filter, and install AI models. Supports CSV direct install and interactive picker.",
+  "help": {
+    "commands": {
+      "(no args)": "Interactive: pick backend, then open the backend's picker",
+      "<csv>": "Direct install: comma-separated model ids (e.g. qwen2.5-coder-3b,llama3.2)",
+      "list": "Show all known models (both backends) with ids",
+      "list llama": "Show only llama.cpp catalog",
+      "list ollama": "Show only Ollama defaults"
+    },
+    "parameters": {
+      "-Backend": "Force a backend: llama-cpp or ollama (skips backend prompt)",
+      "-Install": "CSV of model ids/slugs to install non-interactively",
+      "-List": "List models without installing",
+      "-Help": "Show this help"
+    },
+    "examples": [
+      ".\\run.ps1 models",
+      ".\\run.ps1 model",
+      ".\\run.ps1 -M",
+      ".\\run.ps1 models qwen2.5-coder-3b,llama-3.1-8b-instruct",
+      ".\\run.ps1 models -Backend ollama -Install llama3.2,qwen2.5-coder",
+      ".\\run.ps1 models list",
+      ".\\run.ps1 models list llama"
+    ]
+  },
+  "messages": {
+    "pickBackend": "  Which model backend would you like to use?",
+    "backendLlama": "    [1] llama.cpp  -- GGUF files, hardware-aware picker, runs offline (recommended)",
+    "backendOllama": "    [2] Ollama     -- Managed daemon, simple pull/run, ~12 GB tooling",
+    "backendBoth": "    [3] Both       -- Show both catalogs",
+    "backendQuit": "    [Q] Quit",
+    "backendPrompt": "  Choose backend [1/2/3/Q]",
+    "noBackendSelected": "No backend selected. Aborting.",
+    "dispatching": "  Dispatching to {backend}...",
+    "csvResolveStart": "Resolving {count} model id(s) against catalogs...",
+    "csvResolved": "  [OK]   {id} -> {backend}",
+    "csvUnknown": "  [MISS] {id} -- not found in any catalog",
+    "csvNoneFound": "None of the requested model ids matched any catalog. Use 'list' to see available ids.",
+    "listHeader": "Available models ({backend}):",
+    "complete": "Models setup complete."
+  }
+}

@@ -77,6 +77,8 @@ param(
 
     [switch]$t,
 
+    [switch]$M,
+
     [switch]$Defaults,
 
     [switch]$Y,
@@ -255,6 +257,10 @@ function Show-RootHelp {
     Write-Host "    $(".\run.ps1 status".PadRight($col))" -NoNewline; Write-Host "Show dashboard of all installed tools" -ForegroundColor DarkGray
     Write-Host "    $(".\run.ps1 status --no-choco".PadRight($col))" -NoNewline; Write-Host "Status without outdated package check" -ForegroundColor DarkGray
     Write-Host "    $(".\run.ps1 doctor".PadRight($col))" -NoNewline; Write-Host "Quick health check of project setup" -ForegroundColor DarkGray
+    Write-Host "    $(".\run.ps1 models".PadRight($col))" -NoNewline; Write-Host "Pick AI model backend (llama.cpp / Ollama), browse + install" -ForegroundColor DarkGray
+    Write-Host "    $(".\run.ps1 models <ids>".PadRight($col))" -NoNewline; Write-Host "Direct install: CSV of model ids (auto-routes per backend)" -ForegroundColor DarkGray
+    Write-Host "    $(".\run.ps1 models list".PadRight($col))" -NoNewline; Write-Host "List all models from both catalogs" -ForegroundColor DarkGray
+    Write-Host "    $(".\run.ps1 -M".PadRight($col))" -NoNewline; Write-Host "Shortcut for 'models'" -ForegroundColor DarkGray
     Write-Host "    $(".\run.ps1 path <dir>".PadRight($col))" -NoNewline; Write-Host "Set default dev directory" -ForegroundColor DarkGray
     Write-Host "    $(".\run.ps1 path".PadRight($col))" -NoNewline; Write-Host "Show current dev directory" -ForegroundColor DarkGray
     Write-Host "    $(".\run.ps1 path --reset".PadRight($col))" -NoNewline; Write-Host "Clear saved path, use smart detection" -ForegroundColor DarkGray
@@ -1363,6 +1369,7 @@ if ($hasCommand) {
     $isBareExportCommand  = $normalizedCommand -eq "export"
     $isBareStatusCommand  = $normalizedCommand -eq "status"
     $isBareDoctorCommand  = $normalizedCommand -eq "doctor"
+    $isBareModelsCommand  = $normalizedCommand -eq "models" -or $normalizedCommand -eq "model"
     $isBareScriptId = $normalizedCommand -match '^\d+$'
 
     if ($isBareInstallCommand) {
@@ -1391,6 +1398,11 @@ if ($hasCommand) {
     } elseif ($isBareDoctorCommand) {
         Show-VersionHeader
         Invoke-DoctorCommand
+        exit 0
+    } elseif ($isBareModelsCommand) {
+        Show-VersionHeader
+        $modelsScript = Join-Path $RootDir "scripts\models\run.ps1"
+        & $modelsScript @Install
         exit 0
     } elseif ($isBareUpdateCommand) {
         Show-VersionHeader
@@ -1462,7 +1474,7 @@ if ($hasCommand) {
 
 # ── No params = git pull + help ──────────────────────────────────────
 $hasInstallKeywords = $null -ne $Install -and $Install.Count -gt 0
-$hasNoParams = -not $hasCommand -and -not $I -and -not $hasInstallKeywords -and -not $d -and -not $a -and -not $h -and -not $v -and -not $w -and -not $t -and -not $Help -and -not $List -and -not $CleanOnly -and -not $Clean -and -not $Defaults
+$hasNoParams = -not $hasCommand -and -not $I -and -not $hasInstallKeywords -and -not $d -and -not $a -and -not $h -and -not $v -and -not $w -and -not $t -and -not $M -and -not $Help -and -not $List -and -not $CleanOnly -and -not $Clean -and -not $Defaults
 if ($hasNoParams) {
     Remove-Item Env:\SCRIPTS_ROOT_RUN -ErrorAction SilentlyContinue
     $sharedGitPull = Join-Path $RootDir "scripts\shared\git-pull.ps1"
@@ -1599,6 +1611,14 @@ if ($hasInstallKeywords) {
     }
 
     Remove-Item Env:\SCRIPTS_ROOT_RUN -ErrorAction SilentlyContinue
+    exit 0
+}
+
+# ── -M shortcut: dispatch to models orchestrator ─────────────────────
+if ($M) {
+    Show-VersionHeader
+    $modelsScript = Join-Path $RootDir "scripts\models\run.ps1"
+    & $modelsScript @Install
     exit 0
 }
 

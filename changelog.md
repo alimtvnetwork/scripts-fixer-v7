@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented in this file.
 
+## [v0.32.0] -- 2026-04-17
+
+### Added
+
+- **`scripts/models/` orchestrator** -- new entry point that unifies both AI model backends (llama.cpp + Ollama) under a single command. Thin `run.ps1` (~120 lines) delegates to `helpers/picker.ps1` for backend selection, catalog loading, CSV id resolution (exact + partial match), and dispatch.
+- **`run.ps1` dispatch** -- `models` / `model` / `-M` all open the orchestrator. Supports interactive (backend prompt → existing picker), direct CSV install (`.\run.ps1 models qwen2.5-coder-3b,llama3.2`), `-Backend` to skip the prompt, and `models list [llama|ollama]` to browse catalogs without installing.
+- **`spec/models/readme.md`** -- documents the algorithm, file layout, dispatcher contract (env vars `LLAMA_CPP_INSTALL_IDS` / `OLLAMA_PULL_MODELS`), and how to add a third backend without touching `picker.ps1`.
+
 ## [v0.31.0] -- 2026-04-17
 
 ### Added
