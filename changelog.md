@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented in this file.
 
+## [v0.34.0] -- 2026-04-17
+
+### Added
+
+- **`.\run.ps1 models search <query>`** -- live search against `ollama.com/search?q=<query>` so users can discover and pull any model on Ollama Hub, not just the ~3 defaults baked into `scripts/42-install-ollama/config.json`.
+  - New `scripts/models/helpers/ollama-search.ps1` contains `Invoke-OllamaHubSearch` (HTTP GET with friendly error handling, never throws), `ConvertFrom-OllamaHubHtml` (regex parser anchored on stable `x-test-*` markers the site exposes for tests -- handles absolute and relative hrefs), `Show-OllamaHubResults` (numbered table with sizes / capabilities / pull counts / truncated description), and `Read-OllamaHubSelection` (same `1,3 | 1-5 | all | q` syntax as the other pickers, plus a `:tag` suffix per pick e.g. `2:7b` to pull a specific size).
+  - Selected slugs are joined CSV-style and dispatched to script 42 via the existing `OLLAMA_PULL_MODELS` env-var handoff added in v0.33.0 -- so search results flow through the exact same non-interactive pull path as `.\run.ps1 models <csv>`. No new code paths in script 42.
+  - Help text, `log-messages.json`, and `spec/models/readme.md` updated to document the new subcommand and parser contract.
+- Validated the parser against live results for `phi`, `llama` -- 15/20 and 25/25 valid `library/<slug>` resolutions respectively (the misses are user-namespace results without a library href, correctly skipped).
+
 ## [v0.33.0] -- 2026-04-17
 
 ### Added
