@@ -1610,6 +1610,14 @@ if ($hasInstallKeywords) {
     exit 0
 }
 
+# ── -M shortcut: dispatch to models orchestrator ─────────────────────
+if ($M) {
+    Show-VersionHeader
+    $modelsScript = Join-Path $RootDir "scripts\models\run.ps1"
+    & $modelsScript @Install
+    exit 0
+}
+
 # ── Expand shortcuts ──────────────────────────────────────────────────
 if ($d) { $I = 12 }
 if ($a) { $I = 13 }
