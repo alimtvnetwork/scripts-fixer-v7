@@ -67,13 +67,15 @@ function ConvertFrom-OllamaHubHtml {
     foreach ($block in $blocks) {
         $b = $block.Value
 
-        # Slug + URL: href="https://ollama.com/library/<slug>"
+        # Slug + URL: href can be absolute (https://ollama.com/library/<slug>) or
+        # relative (/library/<slug>). Accept both shapes.
         $slug = $null
         $urlVal = $null
-        $hrefMatch = [regex]::Match($b, 'href="(https://ollama\.com/library/([^"]+))"')
+        $hrefMatch = [regex]::Match($b, 'href="(?:https://ollama\.com)?(/library/([^"]+))"')
         if ($hrefMatch.Success) {
-            $urlVal = $hrefMatch.Groups[1].Value
-            $slug   = $hrefMatch.Groups[2].Value
+            $relPath = $hrefMatch.Groups[1].Value
+            $slug    = $hrefMatch.Groups[2].Value
+            $urlVal  = "https://ollama.com$relPath"
         }
         $hasSlug = -not [string]::IsNullOrWhiteSpace($slug)
         if (-not $hasSlug) { continue }
