@@ -636,27 +636,65 @@ function Invoke-ModelInstaller {
         Write-Log "aria2c unavailable, using standard downloader as fallback." -Level "warn"
     }
 
-    # -- Filters (interactive only) ---------------------------------------------
-    $displayModels = $models
-    if (-not $isOrchestratorRun) {
-        $displayModels = Read-RamFilter -Models $models
-        $displayModels = Read-SizeFilter -Models $displayModels
-        $displayModels = Read-SpeedFilter -Models $displayModels
-        $displayModels = Read-CapabilityFilter -Models $displayModels
-    }
+    # -- Honor LLAMA_CPP_INSTALL_IDS env var (set by scripts/models orchestrator) --
+    # When present, skip filters + prompts entirely and install only the
+    # requested ids (CSV, exact or partial match against catalog `id`).
+    $csvIds = $env:LLAMA_CPP_INSTALL_IDS
+    $hasCsvOverride = -not [string]::IsNullOrWhiteSpace($csvIds)
 
-    # -- Show catalog and get selection ----------------------------------------
-    Show-ModelCatalog -Models $displayModels
+    if ($hasCsvOverride) {
+        Write-Log "LLAMA_CPP_INSTALL_IDS detected: $csvIds -- non-interactive mode" -Level "info"
+        $requestedIds = @($csvIds -split '[,\s]+' | Where-Object { $_.Length -gt 0 } | ForEach-Object { $_.Trim().ToLower() })
 
-    if ($isOrchestratorRun) {
-        # Under orchestrator, download all models
-        Write-Log "Orchestrator mode: downloading all models." -Level "info"
-        $selectedIndices = @(1..$models.Count)
-    } else {
-        $selectedIndices = Read-ModelSelection -MaxIndex $displayModels.Count
-        if ($null -eq $selectedIndices -or $selectedIndices.Count -eq 0) {
-            Write-Log "No models selected. Skipping model downloads." -Level "info"
+        $matched = @()
+        foreach ($rid in $requestedIds) {
+            $hit = $models | Where-Object { $_.id.ToLower() -eq $rid } | Select-Object -First 1
+            if (-not $hit) {
+                $hit = $models | Where-Object { $_.id.ToLower() -like "*$rid*" } | Select-Object -First 1
+            }
+            if ($hit) {
+                Write-Log "  Matched '$rid' -> $($hit.id)" -Level "success"
+                $matched += $hit
+            } else {
+                Write-Log "  No match for id '$rid' in llama.cpp catalog." -Level "warn"
+            }
+        }
+
+        $hasMatches = $matched.Count -gt 0
+        if (-not $hasMatches) {
+            Write-Log "No matching models found for LLAMA_CPP_INSTALL_IDS. Aborting." -Level "error"
             return $modelsDir
+        }
+
+        # Re-index matched subset and skip the picker
+        $idx = 1
+        foreach ($m in $matched) { $m.index = $idx; $idx++ }
+        $displayModels = $matched
+        $selectedIndices = @(1..$matched.Count)
+        Show-ModelCatalog -Models $displayModels
+    }
+    else {
+        # -- Filters (interactive only) -----------------------------------------
+        $displayModels = $models
+        if (-not $isOrchestratorRun) {
+            $displayModels = Read-RamFilter -Models $models
+            $displayModels = Read-SizeFilter -Models $displayModels
+            $displayModels = Read-SpeedFilter -Models $displayModels
+            $displayModels = Read-CapabilityFilter -Models $displayModels
+        }
+
+        # -- Show catalog and get selection ------------------------------------
+        Show-ModelCatalog -Models $displayModels
+
+        if ($isOrchestratorRun) {
+            Write-Log "Orchestrator mode: downloading all models." -Level "info"
+            $selectedIndices = @(1..$displayModels.Count)
+        } else {
+            $selectedIndices = Read-ModelSelection -MaxIndex $displayModels.Count
+            if ($null -eq $selectedIndices -or $selectedIndices.Count -eq 0) {
+                Write-Log "No models selected. Skipping model downloads." -Level "info"
+                return $modelsDir
+            }
         }
     }
 

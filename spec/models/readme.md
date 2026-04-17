@@ -88,14 +88,14 @@ The orchestrator passes resolved ids to backends via env vars rather than
 positional args, since both backend scripts already use positional args
 for their own subcommands (`install`, `pull`, `models`, `uninstall`).
 
-| Backend     | Env var passed         | Subcommand invoked |
-|-------------|------------------------|--------------------|
-| `llama-cpp` | `LLAMA_CPP_INSTALL_IDS` | `all`              |
-| `ollama`    | `OLLAMA_PULL_MODELS`    | `pull`             |
+| Backend     | Env var passed         | Subcommand invoked | Honored by (since) |
+|-------------|------------------------|--------------------|--------------------|
+| `llama-cpp` | `LLAMA_CPP_INSTALL_IDS` | `all`              | `Invoke-ModelInstaller` -- v0.33.0 |
+| `ollama`    | `OLLAMA_PULL_MODELS`    | `pull`             | `Pull-OllamaModels` -- v0.33.0 |
 
-Backend scripts SHOULD read these env vars and skip their own picker when
-present. (Wiring on the backend side is intentionally a follow-up so that
-this orchestrator can ship without touching scripts 42/43.)
+**llama-cpp** behaviour when `LLAMA_CPP_INSTALL_IDS` is set: skip all RAM/size/speed/capability filter prompts, resolve each CSV id against the catalog (exact match first, then `-like *id*`), download only the matched subset. Unmatched ids are warned and skipped; empty result aborts cleanly.
+
+**ollama** behaviour when `OLLAMA_PULL_MODELS` is set: skip per-model yes/no prompt, resolve each slug against `config.json -> defaultModels` (matches `slug` or `pullCommand`), and fall back to ad-hoc `ollama pull <slug>` for unknown slugs so users can pull anything from ollama.com/library without editing config.
 
 ## Examples
 
