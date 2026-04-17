@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented in this file.
 
+## [v0.31.0] -- 2026-04-17
+
+### Added
+
+- **`spec/install-bootstrap/readme.md`** -- new spec documenting the bootstrap auto-discovery algorithm: how `install.ps1` / `install.sh` probe `<base>-vN` repos in parallel (current+1..current+20) and transparently redirect to the newest published generation. Covers algorithm, env-var controls (`SCRIPTS_FIXER_NO_UPGRADE`, `SCRIPTS_FIXER_PROBE_MAX`, `SCRIPTS_FIXER_REDIRECTED`), redirect-loop guard, edge cases, and reference implementations for both PowerShell (`Start-ThreadJob`) and bash (`xargs -P`).
+- **Auto-discovery in `install.ps1`** -- parses current `-vN` repo, fires 20 parallel `HEAD` probes via `Start-ThreadJob` (sequential fallback for Windows PowerShell 5.1), picks highest responding version, re-invokes that repo's `install.ps1` and exits. Friendly `[SCAN]`/`[FOUND]`/`[REDIRECT]`/`[OK]` logging. Loop-safe via `SCRIPTS_FIXER_REDIRECTED=1`. Disable with `-NoUpgrade`.
+- **Auto-discovery in `install.sh`** -- mirror of the PowerShell behaviour using `curl -fsI` + `xargs -P 20` for parallel HEAD probes. Disable with `--no-upgrade`.
+
 ## [v0.30.1] -- 2026-04-16
 
 ### Fixed
