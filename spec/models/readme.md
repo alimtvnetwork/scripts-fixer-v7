@@ -27,6 +27,10 @@ existing scripts (which already own catalogs, filters, and downloaders).
 | `.\run.ps1 models list llama`                        | List only llama.cpp catalog                                   |
 | `.\run.ps1 models list ollama`                       | List only Ollama defaults                                    |
 | `.\run.ps1 models -Help`                             | Help text                                                    |
+| `.\run.ps1 models uninstall`                         | List local installs (both backends), multi-select, delete    |
+| `.\run.ps1 models uninstall llama`                   | Uninstall picker scoped to llama.cpp GGUF files only         |
+| `.\run.ps1 models uninstall ollama`                  | Uninstall picker scoped to Ollama daemon models only         |
+| `.\run.ps1 models rm`                                | Alias for `uninstall`                                        |
 
 ## File layout
 
@@ -37,11 +41,35 @@ scripts/models/
   log-messages.json    # All user-facing strings (per logging convention)
   helpers/
     picker.ps1         # Backend picker, catalog loader, CSV resolver, dispatcher
+    uninstall.ps1      # Local-installs scanner, multi-select picker, deleter
 ```
 
 `run.ps1` only handles arg parsing + flow control. All real logic lives in
-`helpers/picker.ps1` so the file stays under ~120 lines per the project's
+`helpers/*.ps1` so the file stays under ~200 lines per the project's
 "keep run.ps1 small" rule.
+
+## Uninstall
+
+`.\run.ps1 models uninstall` (or `rm` / `remove`) enumerates everything
+currently on this machine across both backends:
+
+- **llama.cpp**: source of truth is `.installed/model-*.json` (the same
+  tracking files written by `Install-SelectedModels`). Each id is
+  cross-referenced with `43-install-llama-cpp/models-catalog.json` to
+  recover `fileName`, `displayName`, and `fileSizeGB`. The GGUF folder is
+  resolved from `.resolved/43-install-llama-cpp.json` first, then
+  `$env:DEV_DIR/llama-models` as fallback. The picker shows whether the
+  file is still on disk so users can also clean up stale tracking entries.
+- **Ollama**: shells out to `ollama list` and parses its tabular output
+  (columns `NAME / ID / SIZE / MODIFIED`, separated by 2+ spaces). When
+  the binary or the daemon are unavailable, this returns an empty array
+  and logs a warning -- never throws.
+
+After multi-select (same syntax as the install pickers), the orchestrator
+prints the proposed deletions and requires an explicit `yes` to proceed.
+Deletion routes per backend: `Remove-Item` + `Remove-InstalledRecord` for
+GGUFs, `ollama rm <id>` for Ollama models. Per-item success/failure is
+logged and a final summary line is printed.
 
 ## Algorithm
 
