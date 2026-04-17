@@ -31,6 +31,7 @@ existing scripts (which already own catalogs, filters, and downloaders).
 | `.\run.ps1 models uninstall llama`                   | Uninstall picker scoped to llama.cpp GGUF files only         |
 | `.\run.ps1 models uninstall ollama`                  | Uninstall picker scoped to Ollama daemon models only         |
 | `.\run.ps1 models rm`                                | Alias for `uninstall`                                        |
+| `.\run.ps1 models uninstall -Force`                  | Skip the `yes` confirmation prompt (CI / scripts)            |
 
 ## File layout
 
@@ -67,9 +68,11 @@ currently on this machine across both backends:
 
 After multi-select (same syntax as the install pickers), the orchestrator
 prints the proposed deletions and requires an explicit `yes` to proceed.
-Deletion routes per backend: `Remove-Item` + `Remove-InstalledRecord` for
-GGUFs, `ollama rm <id>` for Ollama models. Per-item success/failure is
-logged and a final summary line is printed.
+Pass `-Force` to skip the confirmation prompt entirely -- useful for CI
+pipelines and unattended cleanup scripts. Deletion routes per backend:
+`Remove-Item` + `Remove-InstalledRecord` for GGUFs, `ollama rm <id>` for
+Ollama models. Per-item success/failure is logged and a final summary
+line is printed.
 
 ## Algorithm
 

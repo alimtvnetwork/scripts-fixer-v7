@@ -10,6 +10,7 @@ param(
     [string]$Backend,
     [string]$Install,
     [switch]$List,
+    [switch]$Force,
     [switch]$Help
 )
 
@@ -107,10 +108,14 @@ try {
         $targets = @()
         foreach ($i in $picks) { $targets += $combined[$i - 1] }
 
-        $isConfirmed = Confirm-Uninstall -Targets $targets
-        if (-not $isConfirmed) {
-            Write-Log $logMessages.messages.uninstallAborted -Level "info"
-            return
+        if ($Force) {
+            Write-Log $logMessages.messages.uninstallForceSkip -Level "warn"
+        } else {
+            $isConfirmed = Confirm-Uninstall -Targets $targets
+            if (-not $isConfirmed) {
+                Write-Log $logMessages.messages.uninstallAborted -Level "info"
+                return
+            }
         }
 
         $summary = Invoke-ModelUninstall -Targets $targets
