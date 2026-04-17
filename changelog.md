@@ -2,6 +2,15 @@
 
 All notable changes to this project are documented in this file.
 
+## [v0.34.1] -- 2026-04-17
+
+### Added
+
+- **`-Force` flag for `models uninstall`** -- skips the interactive `yes` confirmation prompt so CI pipelines and cleanup scripts can run unattended. Example: `.\run.ps1 models uninstall -Force` or scoped: `.\run.ps1 models uninstall ollama -Force`.
+  - When `-Force` is passed, the orchestrator logs `-Force flag set: skipping confirmation prompt.` (level `warn`) before proceeding to delete the selected targets.
+  - Selection step is unchanged -- you still pass indices via the same `1,3 | 1-5 | all` syntax (or the upstream picker). `-Force` only short-circuits the final yes/no gate.
+- `scripts/models/log-messages.json`: new `uninstallForceSkip` string + help row for `-Force` + new example.
+
 ## [v0.34.0] -- 2026-04-17
 
 ### Added
