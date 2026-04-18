@@ -82,19 +82,30 @@ if ! command -v git &>/dev/null; then
     exit 1
 fi
 
-# -- Clone or pull ------------------------------------------------------------
-if [ -d "$FOLDER/.git" ]; then
-    echo "  [OK] Repo already exists at $FOLDER -- pulling latest..."
-    git -C "$FOLDER" pull --ff-only >/dev/null 2>&1 || echo "  [WARN] Pull failed -- continuing with existing copy."
-else
-    echo "  [>>] Cloning into $FOLDER ..."
-    git clone "$REPO" "$FOLDER" >/dev/null 2>&1
-    if [ ! -d "$FOLDER" ]; then
-        echo "  [ERROR] Clone failed. Check your network and try again."
+# -- Always wipe & re-clone (guarantees a clean, up-to-date checkout) --------
+if [ -e "$FOLDER" ]; then
+    echo "  [CLEAN] Existing folder found at $FOLDER -- removing for fresh clone..."
+    if ! rm -rf "$FOLDER" 2>/dev/null; then
+        echo "  [ERROR] Failed to remove existing folder: $FOLDER"
+        echo "          Reason: insufficient permissions or files in use."
+        echo "          Try: sudo rm -rf \"$FOLDER\"  then re-run."
         exit 1
     fi
-    echo "  [OK] Cloned successfully."
+    echo "  [OK] Removed previous folder."
 fi
+
+echo "  [>>] Cloning fresh into $FOLDER ..."
+if ! git clone "$REPO" "$FOLDER" >/dev/null 2>&1; then
+    echo "  [ERROR] Clone failed for repo: $REPO"
+    echo "          Target folder: $FOLDER"
+    echo "          Check your network and that the repo is public, then try again."
+    exit 1
+fi
+if [ ! -d "$FOLDER/.git" ]; then
+    echo "  [ERROR] Clone finished but .git missing in: $FOLDER"
+    exit 1
+fi
+echo "  [OK] Cloned successfully."
 
 echo ""
 echo "  Done! To get started:"

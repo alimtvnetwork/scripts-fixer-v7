@@ -2,6 +2,15 @@
 
 All notable changes to this project are documented in this file.
 
+## [v0.35.0] -- 2026-04-18
+
+### Changed
+
+- **`install.ps1` and `install.sh` now always remove the existing `scripts-fixer` folder and re-clone fresh** instead of pulling. This guarantees every bootstrap run produces a clean, up-to-date checkout with no local drift, stale untracked files, or merge conflicts blocking the pull.
+  - **Windows (`install.ps1`)**: detects existing `$env:USERPROFILE\scripts-fixer`, clears read-only attributes on all children (handles git pack files), then `Remove-Item -Recurse -Force`. On failure logs the exact path + reason and tells the user to close any open terminal/editor in that folder before retrying. Then runs `git clone` fresh and verifies `.git` exists before continuing.
+  - **Unix/macOS (`install.sh`)**: detects existing `$HOME/scripts-fixer` (any entry, not just a git repo), runs `rm -rf`, on failure logs the exact path + reason and suggests `sudo rm -rf` as the recovery step. Then runs `git clone` fresh and verifies `.git` exists.
+  - Error messages on both sides include the exact failing folder path per the project's CODE RED file-path-error rule.
+
 ## [v0.34.1] -- 2026-04-17
 
 ### Added
