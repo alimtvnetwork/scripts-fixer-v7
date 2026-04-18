@@ -2,15 +2,59 @@
 
 All notable changes to this project are documented in this file.
 
+<<<<<<< HEAD
+=======
+## [v0.36.0] -- 2026-04-18
+
+### Added
+
+- **`-Version` / `--version` flag for install scripts** -- prints the current bootstrap version, probes for the latest available repo version, reports what would be installed, then exits without cloning. Useful for debugging which version a user would get before running the actual install.
+  - **PowerShell**: `irm .../install.ps1 | iex -Version` or `... | iex -Version`
+  - **Bash**: `curl .../install.sh | bash -s -- --version`
+  - Output shows: `[VERSION] Bootstrap vN`, `[SCAN] Probing...`, `[FOUND] Newer version available: vX` or `[OK] You're on the latest`, and `[RESOLVED] Would redirect to ...` or `(current)`.
+  - Added test case to the spec's testing checklist.
+
+## [v0.35.0] -- 2026-04-18
+
+### Changed
+
+- **`install.ps1` and `install.sh` now always remove the existing `scripts-fixer` folder and re-clone fresh** instead of pulling. This guarantees every bootstrap run produces a clean, up-to-date checkout with no local drift, stale untracked files, or merge conflicts blocking the pull.
+  - **Windows (`install.ps1`)**: detects existing `$env:USERPROFILE\scripts-fixer`, clears read-only attributes on all children (handles git pack files), then `Remove-Item -Recurse -Force`. On failure logs the exact path + reason and tells the user to close any open terminal/editor in that folder before retrying. Then runs `git clone` fresh and verifies `.git` exists before continuing.
+  - **Unix/macOS (`install.sh`)**: detects existing `$HOME/scripts-fixer` (any entry, not just a git repo), runs `rm -rf`, on failure logs the exact path + reason and suggests `sudo rm -rf` as the recovery step. Then runs `git clone` fresh and verifies `.git` exists.
+  - Error messages on both sides include the exact failing folder path per the project's CODE RED file-path-error rule.
+
+## [v0.34.1] -- 2026-04-17
+
+### Added
+
+- **`-Force` flag for `models uninstall`** -- skips the interactive `yes` confirmation prompt so CI pipelines and cleanup scripts can run unattended. Example: `.\run.ps1 models uninstall -Force` or scoped: `.\run.ps1 models uninstall ollama -Force`.
+  - When `-Force` is passed, the orchestrator logs `-Force flag set: skipping confirmation prompt.` (level `warn`) before proceeding to delete the selected targets.
+  - Selection step is unchanged -- you still pass indices via the same `1,3 | 1-5 | all` syntax (or the upstream picker). `-Force` only short-circuits the final yes/no gate.
+- `scripts/models/log-messages.json`: new `uninstallForceSkip` string + help row for `-Force` + new example.
+
+>>>>>>> lovable-sync-1776538523
 ## [v0.34.0] -- 2026-04-17
 
 ### Added
 
+<<<<<<< HEAD
 - **`.\run.ps1 models search <query>`** -- live search against `ollama.com/search?q=<query>` so users can discover and pull any model on Ollama Hub, not just the ~3 defaults baked into `scripts/42-install-ollama/config.json`.
   - New `scripts/models/helpers/ollama-search.ps1` contains `Invoke-OllamaHubSearch` (HTTP GET with friendly error handling, never throws), `ConvertFrom-OllamaHubHtml` (regex parser anchored on stable `x-test-*` markers the site exposes for tests -- handles absolute and relative hrefs), `Show-OllamaHubResults` (numbered table with sizes / capabilities / pull counts / truncated description), and `Read-OllamaHubSelection` (same `1,3 | 1-5 | all | q` syntax as the other pickers, plus a `:tag` suffix per pick e.g. `2:7b` to pull a specific size).
   - Selected slugs are joined CSV-style and dispatched to script 42 via the existing `OLLAMA_PULL_MODELS` env-var handoff added in v0.33.0 -- so search results flow through the exact same non-interactive pull path as `.\run.ps1 models <csv>`. No new code paths in script 42.
   - Help text, `log-messages.json`, and `spec/models/readme.md` updated to document the new subcommand and parser contract.
 - Validated the parser against live results for `phi`, `llama` -- 15/20 and 25/25 valid `library/<slug>` resolutions respectively (the misses are user-namespace results without a library href, correctly skipped).
+=======
+- **`.\run.ps1 models uninstall`** -- new orchestrator subcommand (aliases: `remove`, `rm`) that lists every locally installed model across BOTH backends, multi-select with the same `1,3 | 1-5 | all` syntax used by the install pickers, asks for explicit `yes` confirmation, then deletes via each backend's natural removal path.
+  - llama.cpp side: scans `.installed/model-*.json`, cross-references `43-install-llama-cpp/models-catalog.json` to recover `fileName`/`displayName`/`fileSizeGB`, resolves the GGUF folder from `.resolved/43-install-llama-cpp.json` (falls back to `$env:DEV_DIR/llama-models`), shows whether the file is still on disk, then removes the GGUF + drops the `.installed/` tracking record.
+  - Ollama side: shells out to `ollama list`, parses the column-padded output (`NAME / ID / SIZE / MODIFIED`), then deletes via `ollama rm <id>`. Gracefully handles missing daemon / `ollama` binary -- never throws.
+  - Optional scoping: `.\run.ps1 models uninstall llama` or `.\run.ps1 models uninstall ollama` (also works via `-Backend`).
+  - All logic in new `scripts/models/helpers/uninstall.ps1` (Get-InstalledLlamaCppModels, Get-InstalledOllamaModels, Show-UninstallList, Read-UninstallSelection, Confirm-Uninstall, Invoke-ModelUninstall). `run.ps1` stays a thin dispatcher.
+
+### Changed
+
+- `scripts/models/log-messages.json` adds `uninstallScanning / uninstallNothing / uninstallAborted / uninstallSkipped / uninstallPartial / uninstallComplete` strings; help section gains the three uninstall variants and two new examples.
+- `spec/models/readme.md` updated with the new CLI rows, file layout entry, and an "Uninstall" section describing data sources and deletion semantics.
+>>>>>>> lovable-sync-1776538523
 
 ## [v0.33.0] -- 2026-04-17
 

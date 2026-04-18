@@ -51,7 +51,7 @@ self (the user is on a fork or custom name).
 
 ### 2. Probe in parallel
 
-For `N` in `current+1 .. current+20` (inclusive), send a parallel
+For `N` in `current+1 .. current+30` (inclusive), send a parallel
 **HTTP HEAD** request to:
 
 ```
@@ -62,9 +62,9 @@ https://raw.githubusercontent.com/<owner>/<baseName>-v<N>/main/install.ps1
 
 - **Method**: `HEAD` -- lightweight, no body download
 - **Timeout**: 5 seconds per request
-- **Concurrency**: All 20 probes fire in parallel (PowerShell jobs / xargs -P)
+- **Concurrency**: All 30 probes fire in parallel (PowerShell jobs / xargs -P)
 - **Success criterion**: HTTP `200`
-- **Probe range**: `current+20` (configurable via env var, see below)
+- **Probe range**: `current+30` (configurable via env var, see below)
 
 ### 3. Pick the highest
 
@@ -126,8 +126,10 @@ Or, when discovery is skipped:
 |----------------------------------|-----------------------------------------------------|
 | `-NoUpgrade` (PowerShell)        | Skip discovery, run self                            |
 | `--no-upgrade` (bash)            | Skip discovery, run self                            |
+| `-Version` (PowerShell)          | Show current bootstrap + latest resolved, then exit   |
+| `--version` (bash)               | Show current bootstrap + latest resolved, then exit   |
 | `$env:SCRIPTS_FIXER_NO_UPGRADE=1`| Skip discovery (CI-friendly)                        |
-| `$env:SCRIPTS_FIXER_PROBE_MAX=N` | Override probe range (default 20, max 100)          |
+| `$env:SCRIPTS_FIXER_PROBE_MAX=N` | Override probe range (default 30, max 100)          |
 | `$env:SCRIPTS_FIXER_REDIRECTED=1`| Internal: prevents redirect loops, do not set      |
 
 ---
@@ -218,6 +220,7 @@ exit 0
 - [ ] Run from `scripts-fixer-v7` (latest) → runs self with "[OK] You're on the latest"
 - [ ] Run from a fork named `my-fork` (no `-vN`) → runs self, no probes
 - [ ] Run with `-NoUpgrade` → skips discovery
+- [ ] Run with `-Version` / `--version` → prints version info and exits without cloning
 - [ ] Run with `SCRIPTS_FIXER_REDIRECTED=1` preset → skips discovery (loop guard)
 - [ ] Run offline → falls back to self with warning
 - [ ] Probe takes < 3 seconds total when 20 versions are probed in parallel

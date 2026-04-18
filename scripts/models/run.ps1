@@ -10,6 +10,7 @@ param(
     [string]$Backend,
     [string]$Install,
     [switch]$List,
+    [switch]$Force,
     [switch]$Help
 )
 
@@ -25,7 +26,11 @@ $scriptsRoot = Split-Path -Parent $scriptDir
 
 # -- Dot-source orchestrator helpers -----------------------------------------
 . (Join-Path $scriptDir "helpers\picker.ps1")
+<<<<<<< HEAD
 . (Join-Path $scriptDir "helpers\ollama-search.ps1")
+=======
+. (Join-Path $scriptDir "helpers\uninstall.ps1")
+>>>>>>> lovable-sync-1776538523
 
 # -- Load config & log messages ----------------------------------------------
 $config      = Import-JsonConfig (Join-Path $scriptDir "config.json")
@@ -46,10 +51,17 @@ try {
     $firstArg = if ($Args -and $Args.Count -gt 0) { $Args[0].Trim() } else { "" }
     $secondArg = if ($Args -and $Args.Count -gt 1) { $Args[1].Trim() } else { "" }
 
+<<<<<<< HEAD
     $isListMode   = $List -or $firstArg.ToLower() -eq "list"
     $isSearchMode = $firstArg.ToLower() -eq "search"
     $hasInstallParam = -not [string]::IsNullOrWhiteSpace($Install)
     $hasCsvFirstArg = $firstArg -and $firstArg.ToLower() -ne "list" -and $firstArg.ToLower() -ne "search" -and $firstArg -match '[a-z0-9]'
+=======
+    $isListMode      = $List -or $firstArg.ToLower() -eq "list"
+    $isUninstallMode = $firstArg.ToLower() -eq "uninstall" -or $firstArg.ToLower() -eq "remove" -or $firstArg.ToLower() -eq "rm"
+    $hasInstallParam = -not [string]::IsNullOrWhiteSpace($Install)
+    $hasCsvFirstArg  = $firstArg -and $firstArg.ToLower() -ne "list" -and $firstArg.ToLower() -ne "uninstall" -and $firstArg.ToLower() -ne "remove" -and $firstArg.ToLower() -ne "rm" -and $firstArg -match '[a-z0-9]'
+>>>>>>> lovable-sync-1776538523
 
     # ── List mode ────────────────────────────────────────────────────────
     if ($isListMode) {
@@ -67,6 +79,7 @@ try {
         return
     }
 
+<<<<<<< HEAD
     # ── Search mode (Ollama Hub) ─────────────────────────────────────────
     # Usage: .\run.ps1 models search <query>  -- scrapes ollama.com/library
     # for any pullable model, not just the static defaults in script 42's config.
@@ -116,6 +129,65 @@ try {
         }
 
         Write-Log $logMessages.messages.complete -Level "success"
+=======
+    # ── Uninstall mode ───────────────────────────────────────────────────
+    # Lists everything currently on this machine across both backends, lets
+    # the user multi-select with the same syntax (1,3 | 1-5 | all), then
+    # deletes via each backend's natural removal path.
+    if ($isUninstallMode) {
+        $projectRoot = Split-Path -Parent $scriptsRoot
+
+        Write-Log $logMessages.messages.uninstallScanning -Level "info"
+        $llamaModels  = Get-InstalledLlamaCppModels -ScriptsRoot $scriptsRoot -ProjectRoot $projectRoot
+        $ollamaModels = Get-InstalledOllamaModels
+
+        # Optional backend filter from secondArg or -Backend param
+        $uninstFilter = if ($Backend) { $Backend.ToLower() } elseif ($secondArg) { $secondArg.ToLower() } else { "" }
+        $combined = @()
+        if (-not $uninstFilter -or $uninstFilter -eq "llama" -or $uninstFilter -eq "llama-cpp") {
+            $combined += $llamaModels
+        }
+        if (-not $uninstFilter -or $uninstFilter -eq "ollama") {
+            $combined += $ollamaModels
+        }
+
+        if ($combined.Count -eq 0) {
+            Write-Log $logMessages.messages.uninstallNothing -Level "info"
+            return
+        }
+
+        Show-UninstallList -All $combined
+        $picks = Read-UninstallSelection -MaxIndex $combined.Count
+        if ($null -eq $picks) {
+            Write-Log $logMessages.messages.uninstallAborted -Level "info"
+            return
+        }
+        if ($picks.Count -eq 0) {
+            Write-Log $logMessages.messages.uninstallSkipped -Level "info"
+            return
+        }
+
+        $targets = @()
+        foreach ($i in $picks) { $targets += $combined[$i - 1] }
+
+        if ($Force) {
+            Write-Log $logMessages.messages.uninstallForceSkip -Level "warn"
+        } else {
+            $isConfirmed = Confirm-Uninstall -Targets $targets
+            if (-not $isConfirmed) {
+                Write-Log $logMessages.messages.uninstallAborted -Level "info"
+                return
+            }
+        }
+
+        $summary = Invoke-ModelUninstall -Targets $targets
+        $hasFailures = $summary.Fail -gt 0
+        if ($hasFailures) {
+            Write-Log $logMessages.messages.uninstallPartial -Level "warn"
+        } else {
+            Write-Log $logMessages.messages.uninstallComplete -Level "success"
+        }
+>>>>>>> lovable-sync-1776538523
         return
     }
 
