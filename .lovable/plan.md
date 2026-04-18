@@ -1,56 +1,19 @@
 # Project Plan -- Dev Tools Setup
 
-## Current Version: v0.27.0
-## Last Updated: 2026-04-16
+## Current Version: v0.36.0
+## Last Updated: 2026-04-18
 
 ---
 
-## Completed Milestones
+## 🔄 In Progress
 
-### v0.16.x Cycle (Done)
-- [x] Audit Check 12 (export coverage) + root export command
-- [x] Status command + defensive version guards
-- [x] Python libraries script 41 + VSCode export
-- [x] Doctor command + Assert-ToolVersion
+_None._
 
-### v0.17.x - v0.22.x Cycle (Done)
-- [x] Flutter (38), .NET SDK (39), Java/OpenJDK (40) scripts
-- [x] Windows Terminal (37), PowerShell Context Menu (31)
-- [x] Help display alignment fixes
-- [x] Settings export system (NPP, OBS, WT, DBeaver)
-- [x] Installed tool version detection in help display
-- [x] Combo shortcuts (backend, full-stack, data-dev, mobile-dev)
-
-### v0.23.x Cycle (Done)
-- [x] Script 42 -- Install Ollama (download, silent install, model pulling)
-- [x] Script 43 -- Install llama.cpp (CUDA/AVX2 variants, ZIP extraction, PATH)
-- [x] AI install keywords (ollama, llama-cpp, ai-tools, local-ai, ai-full)
-- [x] 69-model GGUF catalog with interactive model picker
-- [x] aria2c accelerated downloads with fallback
-- [x] .installed/ tracking for models
-- [x] Capability filter (coding, reasoning, writing, chat, voice, multilingual)
-
-### v0.26.0 (Done)
-- [x] Expanded catalog from 69 to 81 models (12 new small/fast models)
-- [x] RAM filter (auto-detect system RAM or manual tier selection)
-- [x] Download size filter (Tiny/Small/Medium/Large/XLarge tiers)
-- [x] Speed tier column in catalog display (instant/fast/moderate/slow)
-- [x] Speed filter (4-tier with multi-select support)
-- [x] 4-filter chain: RAM -> Size -> Speed -> Capability
-- [x] CUDA + AVX2 hardware detection for executable variants
-- [x] Updated specs: model-picker, script 43
-
-### v0.27.0 (Done -- Current)
-- [x] AI onboarding protocol (.lovable/prompts/01-read-prompt.md)
-- [x] Created overview.md, strictly-avoid.md, suggestions.md
-- [x] Created prompt.md index and prompts/ folder
-- [x] Updated memory index with all memory files
-
----
-
-## Pending / Next Steps
+## ⏳ Pending / Next Steps
 
 ### Documentation & Quality
+- [ ] Verify `-Version` flag end-to-end on real Windows + Linux shells
+- [ ] Verify auto-discovery redirect with a real `vN+1` sibling repo
 - [ ] Update changelog v0.26.0 entry to include speed filter (added after version bump)
 - [ ] Verify 4-filter chain re-indexing works correctly end-to-end
 - [ ] Verify catalog column alignment with Speed column across all 81 models
@@ -58,7 +21,7 @@
 ### Future Features (Not Started)
 - [ ] GUI/TUI for the interactive menu
 - [ ] Cross-machine settings sync via cloud storage
-- [ ] Linux/macOS support
+- [ ] Linux/macOS support for the actual install scripts (bootstrap already cross-platform)
 - [ ] New tool scripts (Docker, Rust)
 - [ ] Model catalog auto-update from Hugging Face trending
 - [ ] Parallel model downloads (aria2c batch mode)
@@ -66,12 +29,63 @@
 
 ---
 
+## ✅ Completed
+
+### v0.36.0 (2026-04-18)
+- [x] `-Version` / `--version` diagnostic flag for `install.ps1` + `install.sh`
+- [x] Bumped default probe range from current+20 → current+30 in installers and spec
+
+### v0.35.0 (2026-04-18)
+- [x] Bootstrap installers always wipe and fresh-clone `scripts-fixer` (Windows + Unix)
+- [x] CODE RED file-path errors on remove/clone failures with recovery hints
+
+### v0.34.0 / v0.34.1 (2026-04-17)
+- [x] `models search <query>` — live Ollama Hub search with x-test-* regex parser
+- [x] `models uninstall` — multi-backend (llama.cpp + Ollama) with multi-select + confirm
+- [x] `-Force` flag for `models uninstall` (CI-friendly, skips yes/no gate)
+
+### v0.31.0 - v0.33.0 (2026-04-17)
+- [x] `spec/install-bootstrap/readme.md` documenting parallel-probe auto-discovery
+- [x] Auto-discovery in `install.ps1` (Start-ThreadJob, sequential PS 5.1 fallback)
+- [x] Auto-discovery in `install.sh` (`xargs -P 20` parallel HEAD probes)
+- [x] `scripts/models/` orchestrator with `picker.ps1` + env-var handoff contract
+- [x] Non-interactive CSV installs end-to-end across both backends
+
+### v0.27.0 - v0.30.1
+- [x] AI onboarding protocol (`.lovable/prompts/01-read-prompt.md`)
+- [x] `overview.md`, `strictly-avoid.md`, `suggestions.md`, `prompt.md`
+- [x] Dynamic dev-dir banner in `run.ps1`
+
+### v0.23.x - v0.26.0
+- [x] Scripts 42 (Ollama) + 43 (llama.cpp) with CUDA/AVX2 detection
+- [x] 81-model GGUF catalog with 4-filter chain (RAM → Size → Speed → Capability)
+- [x] `aria2c` accelerated downloads with fallback
+- [x] `.installed/` tracking for models
+
+### v0.16.x - v0.22.x
+- [x] Audit, Status, Doctor commands
+- [x] Scripts 37-41 (WT, Flutter, .NET, Java, Python libs)
+- [x] Settings export system (NPP, OBS, WT, DBeaver)
+- [x] Combo shortcuts (backend, full-stack, data-dev, mobile-dev)
+
+---
+
+## 🚫 Avoid / Skipped
+
+| Item | Reason |
+|------|--------|
+| Split `spec/install-bootstrap/readme.md` into sub-files | Suggested but not approved by user — keep as single 224-line file |
+| Modify `.gitmap/release/` folder | Hard rule from `strictly-avoid.md` #7 |
+
+---
+
 ## Architecture Notes
 
 - 43 PowerShell scripts in `scripts/` folder
 - Shared helpers in `scripts/shared/` (logging, path-utils, choco-utils, etc.)
-- External JSON configs per script (config.json, log-messages.json)
+- External JSON configs per script (`config.json`, `log-messages.json`)
 - `.installed/` tracking for idempotent installs
 - `.resolved/` for runtime state persistence
 - `settings/` folder for app config sync (NPP, OBS, WT, DBeaver)
 - Spec docs in `spec/` folder per script
+- Bootstrap installers (`install.ps1`, `install.sh`) auto-discover newer `scripts-fixer-vN` repos

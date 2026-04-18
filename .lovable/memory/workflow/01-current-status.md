@@ -1,38 +1,50 @@
 ---
 name: Current workflow status
-description: What is done and what is pending as of v0.26.0
+description: What is done and what is pending as of v0.36.0
 type: feature
 ---
 
-# Workflow Status -- v0.26.0 (2026-04-16)
+# Workflow Status -- v0.36.0 (2026-04-18)
 
-## Done This Session
+## ✅ Done This Session (v0.34.0 → v0.36.0)
 
 | Task | Status | Details |
 |------|--------|---------|
-| Add 12 new small/fast models to catalog | Done | Gemma 3, Llama 3.2, SmolLM2, Phi-4, Granite 3.1, Qwen3 1.7B, Functionary |
-| Add download size filter | Done | Read-SizeFilter with 5 tiers in model-picker.ps1 |
-| Add speed tier column | Done | instant/fast/moderate/slow based on fileSizeGB |
-| Add speed-based filter | Done | Read-SpeedFilter with multi-select, added to 4-filter chain |
-| RAM filter with auto-detect | Done | Read-RamFilter using WMI Get-CimInstance |
-| CUDA/AVX2 hardware detection | Done | Get-HardwareProfile in hardware-detect.ps1 |
-| Update spec/model-picker/readme.md | Done | Full 3-filter chain, new model table, speed tier |
-| Update spec/43-install-llama-cpp/readme.md | Done | RAM/Size/Capability filter steps, 81-model count |
-| Bump version to v0.26.0 | Done | version.json + changelog.md entry |
+| `models search <query>` -- Ollama Hub live search | ✅ Done | `scripts/models/helpers/ollama-search.ps1`, x-test-* regex parser, CSV dispatch via `OLLAMA_PULL_MODELS` |
+| `models uninstall` orchestrator subcommand | ✅ Done | Multi-backend (llama.cpp + Ollama), multi-select, yes-confirm, `scripts/models/helpers/uninstall.ps1` |
+| `-Force` flag for `models uninstall` (v0.34.1) | ✅ Done | Skips confirm prompt for CI; logs `uninstallForceSkip` |
+| Bootstrap installer always re-clones (v0.35.0) | ✅ Done | `install.ps1` + `install.sh` remove existing folder, re-clone fresh; CODE RED file-path errors |
+| `-Version` / `--version` flag for installers (v0.36.0) | ✅ Done | Probes latest, prints `[VERSION]` `[SCAN]` `[FOUND]`/`[OK]` `[RESOLVED]`, exits without cloning |
+| Bumped probe range default 20 → 30 | ✅ Done | `install.ps1`, `install.sh`, `spec/install-bootstrap/readme.md` |
+| Resolved merge conflicts in `version.json` + `changelog.md` | ✅ Done | Picked v0.36.0; merged both v0.34.0 entries (search + uninstall) |
+| Created `.lovable/pending-issues/` folder | ✅ Done | Required by write-memory protocol |
+| Added `02-write-prompt.md` + updated `prompt.md` index | ✅ Done | Trigger words: "write memory", "end memory", "update memory" |
 
-## Pending
+## 🔄 In Progress
+
+_None._
+
+## ⏳ Pending
 
 | Task | Priority | Notes |
 |------|----------|-------|
-| Update changelog for speed filter | Medium | Speed filter added after v0.26.0 bump |
-| Verify 4-filter re-indexing | Medium | Test RAM -> Size -> Speed -> Capability chain |
-| Verify column alignment | Low | Speed column may shift alignment on long names |
-| Update model-picker spec for speed filter | Medium | Spec currently shows 3-filter, now has 4 |
+| Verify `-Version` flag end-to-end on real shell | Medium | Needs Windows + Linux smoke test |
+| Verify auto-discovery redirect with a real `vN+1` repo | Medium | Spec says fail-fast; only test path is creating a sibling repo |
+| Update changelog v0.26.0 entry to include speed filter | Low | Speed filter shipped after v0.26.0 bump (carryover from v0.27.0 plan) |
+| Verify 4-filter chain re-indexing end-to-end | Low | Carryover; user wanted manual run-through |
+| Verify catalog column alignment with Speed column | Low | Carryover |
 
-## Filter Chain Architecture
+## 🚫 Blocked / Avoid
 
-```
-Read-RamFilter → Read-SizeFilter → Read-SpeedFilter → Read-CapabilityFilter → Show-ModelCatalog
-```
+| Item | Reason |
+|------|--------|
+| Refactor `spec/install-bootstrap/readme.md` into 5 sub-files | User did not approve the split suggestion (offered, not requested). Keep as single file. |
+| Touch `.gitmap/release/` folder | Hard rule from `strictly-avoid.md` #7 |
 
-Each filter: prompt user → filter array → re-index 1..N → return. All optional (Enter to skip).
+## Architecture Snapshot
+
+- **Bootstrap chain:** `install.{ps1,sh}` → parse current `-vN` → parallel HEAD probe v(N+1)..v(N+30) → redirect to highest, or proceed → wipe `$HOME/scripts-fixer` → fresh `git clone` → `run.ps1`
+- **Bootstrap flags:** `-NoUpgrade` / `--no-upgrade`, `-Version` / `--version`, env: `SCRIPTS_FIXER_NO_UPGRADE`, `SCRIPTS_FIXER_PROBE_MAX`, `SCRIPTS_FIXER_REDIRECTED`
+- **Models orchestrator:** `scripts/models/run.ps1` → `picker.ps1` (interactive backend select) | `ollama-search.ps1` (live Hub search) | `uninstall.ps1` (multi-backend remove)
+- **Env-var handoff:** `LLAMA_CPP_INSTALL_IDS` (CSV) → script 43 ; `OLLAMA_PULL_MODELS` (CSV) → script 42
+- **Filter chain (model-picker):** RAM → Size → Speed → Capability → display
