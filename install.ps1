@@ -2,7 +2,7 @@
 #  Scripts Fixer -- One-liner bootstrap installer
 #  Usage:  irm https://raw.githubusercontent.com/alimtvnetwork/scripts-fixer-v7/main/install.ps1 | iex
 #
-#  Auto-discovery: probes scripts-fixer-vN repos (N = current+1..current+20)
+#  Auto-discovery: probes scripts-fixer-vN repos (N = current+1..current+30)
 #  in parallel and redirects to the newest published version.
 #  Spec: spec/install-bootstrap/readme.md
 #  Disable with: -NoUpgrade  or  $env:SCRIPTS_FIXER_NO_UPGRADE = "1"
@@ -19,7 +19,7 @@
     $folder   = Join-Path $env:USERPROFILE "scripts-fixer"
     $repo     = "https://github.com/$owner/$baseName-v$current.git"
 
-    $probeMax = 20
+    $probeMax = 30
     if ($env:SCRIPTS_FIXER_PROBE_MAX) {
         $parsed = 0
         if ([int]::TryParse($env:SCRIPTS_FIXER_PROBE_MAX, [ref]$parsed) -and $parsed -gt 0 -and $parsed -le 100) {
