@@ -27,28 +27,57 @@ existing scripts (which already own catalogs, filters, and downloaders).
 | `.\run.ps1 models list llama`                        | List only llama.cpp catalog                                   |
 | `.\run.ps1 models list ollama`                       | List only Ollama defaults                                    |
 | `.\run.ps1 models -Help`                             | Help text                                                    |
+<<<<<<< HEAD
+| `.\run.ps1 models search llama`                      | **Live search** of ollama.com/library; pick results to pull  |
+| `.\run.ps1 models search`                            | Prompts for query, then live search                          |
+=======
 | `.\run.ps1 models uninstall`                         | List local installs (both backends), multi-select, delete    |
 | `.\run.ps1 models uninstall llama`                   | Uninstall picker scoped to llama.cpp GGUF files only         |
 | `.\run.ps1 models uninstall ollama`                  | Uninstall picker scoped to Ollama daemon models only         |
 | `.\run.ps1 models rm`                                | Alias for `uninstall`                                        |
 | `.\run.ps1 models uninstall -Force`                  | Skip the `yes` confirmation prompt (CI / scripts)            |
+>>>>>>> lovable-sync-1776538523
 
 ## File layout
 
 ```
 scripts/models/
-  run.ps1              # Thin dispatcher (this file is intentionally small)
-  config.json          # Backend registry: scriptFolder, catalogFile, idField
-  log-messages.json    # All user-facing strings (per logging convention)
+  run.ps1                  # Thin dispatcher (this file is intentionally small)
+  config.json              # Backend registry: scriptFolder, catalogFile, idField
+  log-messages.json        # All user-facing strings (per logging convention)
   helpers/
+<<<<<<< HEAD
+    picker.ps1             # Backend picker, catalog loader, CSV resolver, dispatcher
+    ollama-search.ps1      # Live Ollama Hub search + HTML parser + result picker
+=======
     picker.ps1         # Backend picker, catalog loader, CSV resolver, dispatcher
     uninstall.ps1      # Local-installs scanner, multi-select picker, deleter
+>>>>>>> lovable-sync-1776538523
 ```
 
 `run.ps1` only handles arg parsing + flow control. All real logic lives in
 `helpers/*.ps1` so the file stays under ~200 lines per the project's
 "keep run.ps1 small" rule.
 
+<<<<<<< HEAD
+## Ollama Hub search
+
+`.\run.ps1 models search <query>` performs a live HTTP GET against
+`https://ollama.com/search?q=<query>`, parses the result HTML using stable
+`x-test-*` markers (`x-test-model`, `x-test-search-response-title`,
+`x-test-size`, `x-test-capability`, `x-test-pull-count`, `x-test-tag-count`,
+`x-test-updated`), and renders a numbered table. Selection accepts the
+same syntax as the other pickers (`1,3`, `1-5`, `all`, `q`) plus an
+optional `:tag` suffix per pick to target a specific size, e.g. `2:7b`
+pulls `<slug>:7b`. Selected slugs are joined into a CSV and dispatched to
+script 42 via the `OLLAMA_PULL_MODELS` env var (the same handoff used by
+the CSV install path), so unknown slugs become ad-hoc `ollama pull <slug>`
+calls without needing config edits.
+
+The href parser tolerates both absolute (`href="https://ollama.com/library/X"`)
+and relative (`href="/library/X"`) shapes. Network failures and empty
+result sets are logged and return cleanly -- they never throw.
+=======
 ## Uninstall
 
 `.\run.ps1 models uninstall` (or `rm` / `remove`) enumerates everything
@@ -73,6 +102,7 @@ pipelines and unattended cleanup scripts. Deletion routes per backend:
 `Remove-Item` + `Remove-InstalledRecord` for GGUFs, `ollama rm <id>` for
 Ollama models. Per-item success/failure is logged and a final summary
 line is printed.
+>>>>>>> lovable-sync-1776538523
 
 ## Algorithm
 

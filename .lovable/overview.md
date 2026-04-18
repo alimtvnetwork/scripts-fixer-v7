@@ -3,7 +3,7 @@
 ## Identity
 
 **Name:** Dev Tools Setup
-**Version:** v0.26.0
+**Version:** v0.36.0
 **Type:** PowerShell automation toolkit + React documentation site (placeholder)
 **Platform:** Windows 10/11
 
