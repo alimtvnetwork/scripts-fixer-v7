@@ -3,7 +3,7 @@
 #  Scripts Fixer -- One-liner bootstrap installer (Unix/macOS)
 #  Usage:  curl -fsSL https://raw.githubusercontent.com/alimtvnetwork/scripts-fixer-v7/main/install.sh | bash
 #
-#  Auto-discovery: probes scripts-fixer-vN repos (N = current+1..current+20)
+#  Auto-discovery: probes scripts-fixer-vN repos (N = current+1..current+30)
 #  in parallel and redirects to the newest published version.
 #  Spec: spec/install-bootstrap/readme.md
 #  Disable with: --no-upgrade  or  SCRIPTS_FIXER_NO_UPGRADE=1
@@ -16,9 +16,9 @@ CURRENT=7   # <-- bump this when this file is copied into a new -vN repo
 FOLDER="$HOME/scripts-fixer"
 REPO="https://github.com/$OWNER/$BASE-v$CURRENT.git"
 
-PROBE_MAX="${SCRIPTS_FIXER_PROBE_MAX:-20}"
+PROBE_MAX="${SCRIPTS_FIXER_PROBE_MAX:-30}"
 if ! [[ "$PROBE_MAX" =~ ^[0-9]+$ ]] || [ "$PROBE_MAX" -lt 1 ] || [ "$PROBE_MAX" -gt 100 ]; then
-    PROBE_MAX=20
+    PROBE_MAX=30
 fi
 
 NO_UPGRADE=0
