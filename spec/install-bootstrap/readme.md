@@ -126,6 +126,8 @@ Or, when discovery is skipped:
 |----------------------------------|-----------------------------------------------------|
 | `-NoUpgrade` (PowerShell)        | Skip discovery, run self                            |
 | `--no-upgrade` (bash)            | Skip discovery, run self                            |
+| `-Version` (PowerShell)          | Show current bootstrap + latest resolved, then exit   |
+| `--version` (bash)               | Show current bootstrap + latest resolved, then exit   |
 | `$env:SCRIPTS_FIXER_NO_UPGRADE=1`| Skip discovery (CI-friendly)                        |
 | `$env:SCRIPTS_FIXER_PROBE_MAX=N` | Override probe range (default 30, max 100)          |
 | `$env:SCRIPTS_FIXER_REDIRECTED=1`| Internal: prevents redirect loops, do not set      |
