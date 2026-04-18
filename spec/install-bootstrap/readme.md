@@ -126,6 +126,8 @@ Or, when discovery is skipped:
 |----------------------------------|-----------------------------------------------------|
 | `-NoUpgrade` (PowerShell)        | Skip discovery, run self                            |
 | `--no-upgrade` (bash)            | Skip discovery, run self                            |
+| `-Version` (PowerShell)          | Show current bootstrap + latest resolved, then exit   |
+| `--version` (bash)               | Show current bootstrap + latest resolved, then exit   |
 | `$env:SCRIPTS_FIXER_NO_UPGRADE=1`| Skip discovery (CI-friendly)                        |
 | `$env:SCRIPTS_FIXER_PROBE_MAX=N` | Override probe range (default 30, max 100)          |
 | `$env:SCRIPTS_FIXER_REDIRECTED=1`| Internal: prevents redirect loops, do not set      |
@@ -218,6 +220,7 @@ exit 0
 - [ ] Run from `scripts-fixer-v7` (latest) → runs self with "[OK] You're on the latest"
 - [ ] Run from a fork named `my-fork` (no `-vN`) → runs self, no probes
 - [ ] Run with `-NoUpgrade` → skips discovery
+- [ ] Run with `-Version` / `--version` → prints version info and exits without cloning
 - [ ] Run with `SCRIPTS_FIXER_REDIRECTED=1` preset → skips discovery (loop guard)
 - [ ] Run offline → falls back to self with warning
 - [ ] Probe takes < 3 seconds total when 20 versions are probed in parallel

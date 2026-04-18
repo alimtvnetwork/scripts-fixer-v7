@@ -7,6 +7,7 @@
 #  in parallel and redirects to the newest published version.
 #  Spec: spec/install-bootstrap/readme.md
 #  Disable with: --no-upgrade  or  SCRIPTS_FIXER_NO_UPGRADE=1
+#  Version check: --version (shows current and latest, no install)
 # --------------------------------------------------------------------------
 set -e
 
@@ -22,9 +23,11 @@ if ! [[ "$PROBE_MAX" =~ ^[0-9]+$ ]] || [ "$PROBE_MAX" -lt 1 ] || [ "$PROBE_MAX" 
 fi
 
 NO_UPGRADE=0
+VERSION_MODE=0
 for arg in "$@"; do
     case "$arg" in
         --no-upgrade) NO_UPGRADE=1 ;;
+        --version) VERSION_MODE=1 ;;
     esac
 done
 if [ "${SCRIPTS_FIXER_NO_UPGRADE:-0}" = "1" ]; then NO_UPGRADE=1; fi
@@ -32,6 +35,37 @@ if [ "${SCRIPTS_FIXER_NO_UPGRADE:-0}" = "1" ]; then NO_UPGRADE=1; fi
 echo ""
 echo "  Scripts Fixer -- Bootstrap Installer (v$CURRENT)"
 echo ""
+
+# -- Version check mode (discover + report, no clone) ----------------------
+if [ "$VERSION_MODE" = "1" ]; then
+    RANGE_END=$((CURRENT + PROBE_MAX))
+    echo "  [VERSION] Bootstrap v$CURRENT"
+    echo "  [SCAN] Probing v$((CURRENT + 1))..v$RANGE_END for newer releases (parallel)..."
+
+    probe_one() {
+        local n=$1
+        local url="https://raw.githubusercontent.com/$OWNER/$BASE-v$n/main/install.sh"
+        if curl -fsI -m 5 "$url" >/dev/null 2>&1; then
+            echo "$n"
+        fi
+    }
+    export -f probe_one
+    export OWNER BASE
+
+    LATEST=$(seq $((CURRENT + 1)) "$RANGE_END" \
+        | xargs -P 20 -I{} bash -c 'probe_one "$@"' _ {} 2>/dev/null \
+        | sort -n | tail -1)
+
+    if [ -n "$LATEST" ] && [ "$LATEST" -gt "$CURRENT" ]; then
+        echo "  [FOUND] Newer version available: v$LATEST"
+        echo "  [RESOLVED] Would redirect to $BASE-v$LATEST"
+    else
+        echo "  [OK] You're on the latest (v$CURRENT)"
+    fi
+    echo ""
+    echo "  (Use without --version flag to actually install)"
+    exit 0
+fi
 
 # -- Auto-discovery: probe for newer -vN repos -------------------------------
 if [ "${SCRIPTS_FIXER_REDIRECTED:-0}" = "1" ]; then

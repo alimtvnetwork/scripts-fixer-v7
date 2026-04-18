@@ -6,9 +6,10 @@
 #  in parallel and redirects to the newest published version.
 #  Spec: spec/install-bootstrap/readme.md
 #  Disable with: -NoUpgrade  or  $env:SCRIPTS_FIXER_NO_UPGRADE = "1"
+#  Version check: -Version (shows current and latest, no install)
 # --------------------------------------------------------------------------
 & {
-    param([switch]$NoUpgrade)
+    param([switch]$NoUpgrade, [switch]$Version)
 
     $ErrorActionPreference = "Stop"
 
@@ -30,6 +31,61 @@
     Write-Host ""
     Write-Host "  Scripts Fixer -- Bootstrap Installer (v$current)" -ForegroundColor Cyan
     Write-Host ""
+
+    # ----- Version check mode (discover + report, no clone) ----------------
+    if ($Version) {
+        $rangeEnd = $current + $probeMax
+        Write-Host "  [VERSION] Bootstrap v$current" -ForegroundColor Cyan
+        Write-Host "  [SCAN] Probing v$($current + 1)..v$rangeEnd for newer releases (parallel)..." -ForegroundColor Yellow
+
+        $hasThreadJob = $null -ne (Get-Command Start-ThreadJob -ErrorAction SilentlyContinue)
+        $found = @()
+
+        try {
+            if ($hasThreadJob) {
+                $jobs = @()
+                foreach ($n in ($current + 1)..$rangeEnd) {
+                    $url = "https://raw.githubusercontent.com/$owner/$baseName-v$n/main/install.ps1"
+                    $jobs += Start-ThreadJob -ScriptBlock {
+                        param($u, $v)
+                        try {
+                            $r = Invoke-WebRequest -Uri $u -Method Head -UseBasicParsing -TimeoutSec 5 -ErrorAction Stop
+                            if ($r.StatusCode -eq 200) { return $v }
+                        } catch {}
+                        return $null
+                    } -ArgumentList $url, $n
+                }
+                $results = $jobs | Wait-Job -Timeout 15 | Receive-Job
+                $jobs | Remove-Job -Force -ErrorAction SilentlyContinue
+                $found = @($results | Where-Object { $null -ne $_ })
+            } else {
+                foreach ($n in ($current + 1)..$rangeEnd) {
+                    $url = "https://raw.githubusercontent.com/$owner/$baseName-v$n/main/install.ps1"
+                    try {
+                        $r = Invoke-WebRequest -Uri $url -Method Head -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop
+                        if ($r.StatusCode -eq 200) { $found += $n }
+                    } catch {}
+                }
+            }
+        } catch {
+            Write-Host "  [WARN] Discovery failed: $_" -ForegroundColor Yellow
+        }
+
+        if ($found.Count -gt 0) {
+            $latest = ($found | Measure-Object -Maximum).Maximum
+            if ($latest -gt $current) {
+                Write-Host "  [FOUND] Newer version available: v$latest" -ForegroundColor Green
+                Write-Host "  [RESOLVED] Would redirect to $baseName-v$latest" -ForegroundColor Cyan
+            } else {
+                Write-Host "  [OK] You're on the latest (v$current)" -ForegroundColor Green
+            }
+        } else {
+            Write-Host "  [OK] You're on the latest (v$current)" -ForegroundColor Green
+        }
+        Write-Host ""
+        Write-Host "  (Use without -Version flag to actually install)" -ForegroundColor DarkGray
+        return
+    }
 
     # ----- Auto-discovery: probe for newer -vN repos -----------------------
     $skipDiscovery = $NoUpgrade -or $env:SCRIPTS_FIXER_NO_UPGRADE -eq "1" -or $env:SCRIPTS_FIXER_REDIRECTED -eq "1"
