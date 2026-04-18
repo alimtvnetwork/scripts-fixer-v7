@@ -220,6 +220,7 @@ exit 0
 - [ ] Run from `scripts-fixer-v7` (latest) → runs self with "[OK] You're on the latest"
 - [ ] Run from a fork named `my-fork` (no `-vN`) → runs self, no probes
 - [ ] Run with `-NoUpgrade` → skips discovery
+- [ ] Run with `-Version` / `--version` → prints version info and exits without cloning
 - [ ] Run with `SCRIPTS_FIXER_REDIRECTED=1` preset → skips discovery (loop guard)
 - [ ] Run offline → falls back to self with warning
 - [ ] Probe takes < 3 seconds total when 20 versions are probed in parallel
