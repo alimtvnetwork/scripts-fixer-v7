@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented in this file.
 
+## [v0.36.0] -- 2026-04-18
+
+### Added
+
+- **`-Version` / `--version` flag for install scripts** -- prints the current bootstrap version, probes for the latest available repo version, reports what would be installed, then exits without cloning. Useful for debugging which version a user would get before running the actual install.
+  - **PowerShell**: `irm .../install.ps1 | iex -Version` or `... | iex -Version`
+  - **Bash**: `curl .../install.sh | bash -s -- --version`
+  - Output shows: `[VERSION] Bootstrap vN`, `[SCAN] Probing...`, `[FOUND] Newer version available: vX` or `[OK] You're on the latest`, and `[RESOLVED] Would redirect to ...` or `(current)`.
+  - Added test case to the spec's testing checklist.
+
 ## [v0.35.0] -- 2026-04-18
 
 ### Changed
