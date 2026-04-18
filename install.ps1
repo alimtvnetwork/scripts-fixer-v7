@@ -111,28 +111,36 @@
         return
     }
 
-    # ----- Clone or pull ----------------------------------------------------
-    if (Test-Path (Join-Path $folder ".git")) {
-        Write-Host "  [OK] Repo already exists at $folder -- pulling latest..." -ForegroundColor Green
+    # ----- Always wipe & re-clone (guarantees a clean, up-to-date checkout) -
+    $hasFolder = Test-Path $folder
+    if ($hasFolder) {
+        Write-Host "  [CLEAN] Existing folder found at $folder -- removing for fresh clone..." -ForegroundColor Yellow
         try {
-            $null = & git -C $folder pull --ff-only 2>&1
+            # Clear read-only bits (git pack files often are) before removal
+            Get-ChildItem -Path $folder -Recurse -Force -ErrorAction SilentlyContinue |
+                ForEach-Object { try { $_.Attributes = 'Normal' } catch {} }
+            Remove-Item -Path $folder -Recurse -Force -ErrorAction Stop
+            Write-Host "  [OK] Removed previous folder." -ForegroundColor Green
         } catch {
-            Write-Host "  [WARN] Pull failed -- continuing with existing copy." -ForegroundColor Yellow
-        }
-    } else {
-        Write-Host "  [>>] Cloning into $folder ..." -ForegroundColor Yellow
-        try {
-            $null = & git clone $repo $folder 2>&1
-        } catch {
-            Write-Host "  [ERROR] Clone failed: $_" -ForegroundColor Red
+            Write-Host "  [ERROR] Failed to remove existing folder: $folder" -ForegroundColor Red
+            Write-Host "          Reason: $_" -ForegroundColor Red
+            Write-Host "          Close any open file/terminal in that folder and re-run." -ForegroundColor DarkGray
             return
         }
-        if (-not (Test-Path $folder)) {
-            Write-Host "  [ERROR] Clone failed. Check your network and try again." -ForegroundColor Red
-            return
-        }
-        Write-Host "  [OK] Cloned successfully." -ForegroundColor Green
     }
+
+    Write-Host "  [>>] Cloning fresh into $folder ..." -ForegroundColor Yellow
+    try {
+        $null = & git clone $repo $folder 2>&1
+    } catch {
+        Write-Host "  [ERROR] Clone failed: $_" -ForegroundColor Red
+        return
+    }
+    if (-not (Test-Path (Join-Path $folder ".git"))) {
+        Write-Host "  [ERROR] Clone failed (no .git in $folder). Check your network and try again." -ForegroundColor Red
+        return
+    }
+    Write-Host "  [OK] Cloned successfully." -ForegroundColor Green
 
     # ----- Launch interactive menu -----------------------------------------
     Write-Host ""
